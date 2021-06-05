@@ -17,6 +17,7 @@
 		D18F012E26665CF100AEDE59 /* testUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F012D26665CF100AEDE59 /* testUITests.swift */; };
 		D18F014A266A2DA000AEDE59 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */; };
 		D18F014C266A55A800AEDE59 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */; };
+		D19E8147266B7BC000EC1312 /* ForgotViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E8146266B7BC000EC1312 /* ForgotViewController.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -53,6 +54,7 @@
 		D18F012F26665CF100AEDE59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
 		D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
+		D19E8146266B7BC000EC1312 /* ForgotViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotViewController.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 				D18F010B26665CED00AEDE59 /* AppDelegate.swift */,
 				D18F010D26665CED00AEDE59 /* SceneDelegate.swift */,
 				D18F010F26665CED00AEDE59 /* LoginViewController.swift */,
+				D19E8146266B7BC000EC1312 /* ForgotViewController.swift */,
 				D18F011126665CED00AEDE59 /* Main.storyboard */,
 				D18F011426665CF100AEDE59 /* Assets.xcassets */,
 				D18F011626665CF100AEDE59 /* LaunchScreen.storyboard */,
@@ -269,6 +272,7 @@
 				D18F010E26665CED00AEDE59 /* SceneDelegate.swift in Sources */,
 				D18F014A266A2DA000AEDE59 /* RegisterViewController.swift in Sources */,
 				D18F014C266A55A800AEDE59 /* WelcomeViewController.swift in Sources */,
+				D19E8147266B7BC000EC1312 /* ForgotViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -11,11 +11,26 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     
     var textName:UITextField!
     var textPassWord:UITextField!
+    let loginButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         //父类初始化
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        
+        // 导航控制器设置
+        self.view.backgroundColor = UIColor.white
+        // 当前页和返回页字符不显示
+        self.title = ""
+        // 右按钮内容，颜色，响应设置
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title:"立即注册",style:UIBarButtonItem.Style.plain,target: self, action: #selector(LoginViewController.registerPage))
+        self.navigationItem.rightBarButtonItem?.tintColor = UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1)
+        // 返回按钮颜色设置
+        self.navigationController?.navigationBar.tintColor = UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1)
+        // 全透明设置
+        self.navigationController?.navigationBar.barTintColor = UIColor.white
+        self.navigationController?.navigationBar.shadowImage = UIImage()
+        //字体大小设置？
         
         // 1.墨墨mind图标显示 封装？
         // 1.1.先将view居中再向上平移，位置，适配？
@@ -49,26 +64,21 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         textPassWord.keyboardType = UIKeyboardType.emailAddress // 键盘类型为邮箱
         textPassWord.isSecureTextEntry = true // 是否安全输入 小圆点 和按钮交互
         
+        textName.addTarget(self, action: #selector(LoginViewController.textValueChanged), for: UIControl.Event.editingChanged)
+        textPassWord.addTarget(self, action: #selector(LoginViewController.textValueChanged), for: UIControl.Event.editingChanged)
+        
         textPassWord.delegate = self
         textName.delegate = self
         self.view.addSubview(textName)
         self.view.addSubview(textPassWord)
         
         // 3.按钮, 长度？ 字体格式？ 适配？
-        // 3.1 注册按钮
-        let registerButton = UIButton(type: .system)
-        registerButton.frame = CGRect(x:280, y:30, width:88, height:44)
-        registerButton.setTitle("立即注册", for: .normal)
-        registerButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
-        registerButton.setTitleColor(UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1), for: .normal)
-        self.view.addSubview(registerButton)
-        // 3.1.2 点击按钮转入注册界面
         
         // 3.2 登陆按钮
-        let loginButton = UIButton(type: .system)
         loginButton.frame = CGRect(x: 0, y: 0, width: 297,height: 44)
         loginButton.center = textPassWord.center
         loginButton.center.y = textPassWord.center.y + 82
+        // loginButton.backgroungColor =
         loginButton.backgroundColor = UIColor.init(red: 229/255.0, green: 229/255.0, blue: 229/255.0, alpha: 1)
         loginButton.setTitle("登陆", for: .normal)
         loginButton.setTitleColor(UIColor.white, for: .normal)
@@ -81,10 +91,14 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         forgotButton.center.x = textPassWord.center.x + 112.5
         forgotButton.center.y = textPassWord.center.y + 38
         forgotButton.setTitle("忘记密码", for: .normal)
+        forgotButton.tintColor = UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1)
         forgotButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
         //根据字体调整框大小
         forgotButton.adjustsImageSizeForAccessibilityContentSizeCategory = true
         //3.3.1 点击进入忘记密码页面
+        forgotButton.addTarget(self, action: #selector(LoginViewController.forgotPage), for: UIControl.Event.touchUpInside)
+        self.view.addSubview(forgotButton)
+        
         
         //3.4 显示-隐藏密码按钮
         let eyeButton = UIButton(type: .system)
@@ -108,44 +122,33 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         errorLabel.center.x = textPassWord.center.x - 108.5
         errorLabel.center.y = forgotButton.center.y
         self.view.addSubview(errorLabel)
+        
+        
     }
     // 回收键盘
     func textFieldShouldReturn(_ textName: UITextField) -> Bool {
         textName.resignFirstResponder()
         return true
     }
-    func validateEmail(email: String) -> Bool {
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
-        let emailTest:NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
-        return emailTest.evaluate(with: email)
+    
+    // 响应的方法，视图入栈
+    @objc func registerPage(){
+        let viewController = RegisterViewController()
+        self.navigationController?.pushViewController(viewController, animated: true)
     }
-
-    @objc func loginEvent(){
-            let usercode = textName.text!   //获取用户名
-            let password = textPassWord.text!    //获取密码
-            textName.resignFirstResponder()  //通知此对象，要求其在其窗口中放弃其作为第一响应者的状态。
-            textPassWord.resignFirstResponder()
-            
-            //如果用户名和密码都正确的话
-            if usercode == "hedon" && password=="123"{
-                //取得id=“Main”的Storyboard的实例
-                let mainBoard:UIStoryboard! = UIStoryboard(name: "Main", bundle: nil)
-                //取得identifier = “vcMain”的ViewController
-                //这里需要我们自己去 Main.storyboard 里面设置
-                let VCMain = mainBoard!.instantiateViewController(withIdentifier: "vcMain");
-                
-                UIApplication.shared.windows[0].rootViewController = VCMain
-            }
-            else{  //登录不成功
-                //定义一个警告窗口
-                let p = UIAlertController(title: "登录失败", message: "用户名或密码错误", preferredStyle: .alert)
-                
-                //点击确定后，自动将密码清零
-                p.addAction(UIAlertAction(title: "确定", style: .default, handler: {(act:UIAlertAction)in self.textPassWord.text=""}))
-                
-                //呈现出错误窗口(模态)
-                present(p,animated: false,completion: nil)
-            }
+    
+    @objc func forgotPage(){
+        let viewController = ForgotViewController()
+        self.navigationController?.pushViewController(viewController, animated: true)
+    }
+    
+    @objc func textValueChanged(){
+        if textName.text?.isEmpty == false && textPassWord.text?.isEmpty == false{
+            loginButton.backgroundColor = UIColor.init(red:54/255.0, green:181/255.0, blue:157/255.0,alpha: 1)
         }
+        else{
+            loginButton.backgroundColor = UIColor.init(red: 229/255.0, green: 229/255.0, blue: 229/255.0, alpha: 1)
+        }
+    }
 }
 

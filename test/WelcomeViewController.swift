@@ -30,8 +30,12 @@ class WelcomeViewController: UIViewController {
         logoutButton.setTitleColor(UIColor(red:142/255.0,green:142/255.0,blue:142/255.0,alpha: 1), for: .normal)
         self.view.addSubview(logoutButton)
         // 3.1.2 点击登出按钮返回登陆界面
+        logoutButton.addTarget(self, action: #selector(WelcomeViewController.loginPage), for: UIControl.Event.touchUpInside)
     }
-    
+    @objc func loginPage(){
+        let viewController = LoginViewController()
+        self.navigationController?.pushViewController(viewController, animated: true)
+    }
 
     /*
     // MARK: - Navigation

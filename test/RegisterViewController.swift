@@ -12,11 +12,18 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     var textName:UITextField!
     var textPassWord:UITextField!
     var textPassWordConfirm:UITextField!
+    let registerButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
 
         // Do any additional setup after loading the view.
+        
+        // 导航控制器设置
+        
+        self.view.backgroundColor = UIColor.white
+        self.navigationController?.navigationBar.barTintColor = UIColor.white
+        self.navigationController?.navigationBar.shadowImage = UIImage()
         
         // 1. 标签显示
         
@@ -65,9 +72,14 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         textPassWordConfirm.keyboardType = UIKeyboardType.default // 键盘类型为邮箱
         textPassWordConfirm.isSecureTextEntry = true // 是否安全输入 小圆点 和按钮交互
         
+        textName.addTarget(self, action: #selector(RegisterViewController.textValueChanged), for: UIControl.Event.editingChanged)
+        textPassWord.addTarget(self, action: #selector(RegisterViewController.textValueChanged), for: UIControl.Event.editingChanged)
+        textPassWordConfirm.addTarget(self, action: #selector(RegisterViewController.textValueChanged), for: UIControl.Event.editingChanged)
+        
         textName.delegate = self
         textPassWord.delegate = self
         textPassWordConfirm.delegate = self
+        
         self.view.addSubview(textName)
         self.view.addSubview(textPassWord)
         self.view.addSubview(textPassWordConfirm)
@@ -75,7 +87,6 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         // 3. 按钮显示
         
         // 3.1 注册按钮
-        let registerButton = UIButton(type: .system)
         registerButton.frame = CGRect(x: 0, y: 0, width: 297,height: 44)
         registerButton.center.x = self.view.center.x
         registerButton.center.y = textPassWordConfirm.center.y + 86
@@ -101,6 +112,15 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     func textFieldShouldReturn(_ textName: UITextField) -> Bool {
         textName.resignFirstResponder()
         return true
+    }
+    
+    @objc func textValueChanged(){
+        if textName.text?.isEmpty == false && textPassWord.text?.isEmpty == false && textPassWordConfirm.text?.isEmpty == false {
+            registerButton.backgroundColor = UIColor.init(red:54/255.0, green:181/255.0, blue:157/255.0,alpha: 1)
+        }
+        else{
+            registerButton.backgroundColor = UIColor.init(red: 229/255.0, green: 229/255.0, blue: 229/255.0, alpha: 1)
+        }
     }
     /*
     // MARK: - Navigation
