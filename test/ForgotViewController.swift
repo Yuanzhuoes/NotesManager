@@ -13,6 +13,7 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
     var textVerify:UITextField!
     var textNewPassWord:UITextField!
     let modifyButton = UIButton(type: .system)
+    let eyeButton = UIButton(type: .custom)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -28,11 +29,12 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         registerLabel.textColor = UIColor.init(red: 93/225.0, green: 93/225.0, blue: 93/225.0, alpha: 1)
         self.view.addSubview(registerLabel)
         
-        // 1.2 错误信息标签显示
+        // 1.2 错误信息标签显示 先隐藏了 具体是啥最后填
         let errorLabel = UILabel(frame: CGRect(x: 40, y: 315, width: 80, height: 32))
-        errorLabel.text = "密码不一致"
+        errorLabel.text = "待定"
         errorLabel.font = UIFont.systemFont(ofSize: 12)
         errorLabel.textColor = UIColor.init(red: 220/225.0, green: 102/225.0, blue: 62/225.0, alpha: 1)
+        errorLabel.isHidden = true
         self.view.addSubview(errorLabel)
         
         
@@ -87,12 +89,12 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         modifyButton.backgroundColor = UIColor.init(red: 229/255.0, green: 229/255.0, blue: 229/255.0, alpha: 1)
         modifyButton.setTitle("修改", for: .normal)
         modifyButton.setTitleColor(UIColor.white, for: .normal)
+        modifyButton.isEnabled = false
         // 3.2.1 输入后高亮
         
         self.view.addSubview(modifyButton)
         
         // 3.2 显示-隐藏按钮
-        let eyeButton = UIButton(type: .system)
         eyeButton.frame = CGRect(x:0, y:0, width:44, height:44)
         eyeButton.center.x = textNewPassWord.center.x + 126.5
         eyeButton.center.y = textNewPassWord.center.y
@@ -100,7 +102,8 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         // 更改自定义图片的颜色
         eyeButton.tintColor = UIColor(red:170/255.0,green:170/255.0,blue:170/255.0,alpha: 1)
         // 更改自定义图片的大小 先不管 找合适的图片就好
-        eyeButton.imageEdgeInsets = UIEdgeInsets(top: 32, left:32, bottom:32, right:32 )
+        eyeButton.imageEdgeInsets = UIEdgeInsets(top: 28, left:28, bottom:28, right:28)
+        eyeButton.addTarget(self, action: #selector(LoginViewController.eyeButtonTapped), for: UIControl.Event.touchUpInside)
         self.view.addSubview(eyeButton)
         
         // 3.3 获取验证码按钮
@@ -125,9 +128,25 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
     @objc func textValueChanged(){
         if textName.text?.isEmpty == false && textVerify.text?.isEmpty == false && textNewPassWord.text?.isEmpty == false {
             modifyButton.backgroundColor = UIColor.init(red:54/255.0, green:181/255.0, blue:157/255.0,alpha: 1)
+            modifyButton.isEnabled = true
         }
         else{
             modifyButton.backgroundColor = UIColor.init(red: 229/255.0, green: 229/255.0, blue: 229/255.0, alpha: 1)
+            modifyButton.isEnabled = false
+        }
+    }
+    
+    @objc func eyeButtonTapped(){
+        if eyeButton.isSelected {
+            eyeButton.setImage(UIImage(named: "EyeOff"), for: .normal)
+            eyeButton.isSelected = false
+            textNewPassWord.isSecureTextEntry = true
+        }
+        else{
+            // 颜色显示有问题
+            eyeButton.setImage(UIImage(named: "EyeOn"), for: .normal)
+            eyeButton.isSelected = true
+            textNewPassWord.isSecureTextEntry = false
         }
     }
 }

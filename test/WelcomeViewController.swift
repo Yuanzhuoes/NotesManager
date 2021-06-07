@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Alamofire
 
 class WelcomeViewController: UIViewController {
 
@@ -13,6 +14,11 @@ class WelcomeViewController: UIViewController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         
+        // 隐藏当前视图的返回按钮 登入登出还有其他的解决方案吗
+        self.navigationItem.setHidesBackButton(true, animated: false)
+        
+        // 根视图背景设置，加入导航后，根视图是导航控制器，默认为黑色
+        self.view.backgroundColor = UIColor.white
         // 1. 图标显示
         let LoginView = UIImageView(frame: CGRect(x:0, y:0, width:265, height: 128))
         LoginView.center.x = self.view.center.x
@@ -23,18 +29,13 @@ class WelcomeViewController: UIViewController {
         self.view.addSubview(LoginView)
         
         // 2. 登出按钮
-        let logoutButton = UIButton(type: .system)
-        logoutButton.frame = CGRect(x:295, y:30, width:88, height:44)
-        logoutButton.setTitle("登出", for: .normal)
-        logoutButton.titleLabel?.font = UIFont.systemFont(ofSize: 15)
-        logoutButton.setTitleColor(UIColor(red:142/255.0,green:142/255.0,blue:142/255.0,alpha: 1), for: .normal)
-        self.view.addSubview(logoutButton)
-        // 3.1.2 点击登出按钮返回登陆界面
-        logoutButton.addTarget(self, action: #selector(WelcomeViewController.loginPage), for: UIControl.Event.touchUpInside)
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(title:"登出",style:UIBarButtonItem.Style.plain,target: self, action: #selector(WelcomeViewController.loginPage))
+        self.navigationItem.rightBarButtonItem?.tintColor = UIColor(red:142/255.0,green:142/255.0,blue:142/255.0,alpha: 1)
     }
+    
     @objc func loginPage(){
-        let viewController = LoginViewController()
-        self.navigationController?.pushViewController(viewController, animated: true)
+        // 直接pop到根视图，即登陆界面
+        self.navigationController?.popToRootViewController(animated: false)
     }
 
     /*

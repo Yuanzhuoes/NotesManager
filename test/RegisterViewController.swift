@@ -12,7 +12,9 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     var textName:UITextField!
     var textPassWord:UITextField!
     var textPassWordConfirm:UITextField!
-    let registerButton = UIButton(type: .system)
+    var errorLabel: UILabel!
+    let displayButton = UIButton(type: .custom)
+    var registerButton = UIButton(type: .system)
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -35,10 +37,11 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         self.view.addSubview(registerLabel)
         
         // 1.2 错误信息标签显示
-        let errorLabel = UILabel(frame: CGRect(x: 40, y: 315, width: 80, height: 32))
+        errorLabel = UILabel(frame: CGRect(x: 40, y: 315, width: 80, height: 32))
         errorLabel.text = "密码不一致"
         errorLabel.font = UIFont.systemFont(ofSize: 12)
         errorLabel.textColor = UIColor.init(red: 220/225.0, green: 102/225.0, blue: 62/225.0, alpha: 1)
+        errorLabel.isHidden = true
         self.view.addSubview(errorLabel)
         
         
@@ -76,6 +79,9 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         textPassWord.addTarget(self, action: #selector(RegisterViewController.textValueChanged), for: UIControl.Event.editingChanged)
         textPassWordConfirm.addTarget(self, action: #selector(RegisterViewController.textValueChanged), for: UIControl.Event.editingChanged)
         
+        // 最后一个框响应还是登陆按钮响应
+        textPassWordConfirm.addTarget(self, action: #selector(RegisterViewController.passwordDetection), for: UIControl.Event.editingChanged)
+        
         textName.delegate = self
         textPassWord.delegate = self
         textPassWordConfirm.delegate = self
@@ -93,20 +99,22 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         registerButton.backgroundColor = UIColor.init(red: 229/255.0, green: 229/255.0, blue: 229/255.0, alpha: 1)
         registerButton.setTitle("注册", for: .normal)
         registerButton.setTitleColor(UIColor.white, for: .normal)
+        registerButton.isEnabled = false
         // 3.2.1 输入后高亮
         
         self.view.addSubview(registerButton)
         
         // 2.2 显示-隐藏按钮
-        let dispalyButton = UIButton(type: .system)
-        dispalyButton.frame = CGRect(x:288, y:315, width:44, height:32)
-        dispalyButton.setTitle("显示密码", for: .normal)
-        dispalyButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
-        dispalyButton.adjustsImageSizeForAccessibilityContentSizeCategory = true
+        displayButton.frame = CGRect(x:288, y:315, width:44, height:32)
+        displayButton.setTitle("显示密码", for: .normal)
+        displayButton.titleLabel!.font = UIFont.systemFont(ofSize: 12)
+        displayButton.adjustsImageSizeForAccessibilityContentSizeCategory = true
         // 更改颜色
-        dispalyButton.tintColor = UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1)
+        displayButton.setTitleColor(UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1), for: .normal)
         // 2.2.1 点击换字
-        self.view.addSubview(dispalyButton)
+        displayButton.addTarget(self, action: #selector(RegisterViewController.displayButtonTapped), for: UIControl.Event.touchUpInside)
+        
+        self.view.addSubview(displayButton)
     }
     
     func textFieldShouldReturn(_ textName: UITextField) -> Bool {
@@ -114,12 +122,46 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         return true
     }
     
+    // 注册按钮变色响应
     @objc func textValueChanged(){
         if textName.text?.isEmpty == false && textPassWord.text?.isEmpty == false && textPassWordConfirm.text?.isEmpty == false {
             registerButton.backgroundColor = UIColor.init(red:54/255.0, green:181/255.0, blue:157/255.0,alpha: 1)
+            registerButton.isEnabled = true
         }
         else{
             registerButton.backgroundColor = UIColor.init(red: 229/255.0, green: 229/255.0, blue: 229/255.0, alpha: 1)
+            registerButton.isEnabled = false
+        }
+    }
+    
+    // 显示-隐藏按钮响应 为什么开始要多点一次才触发
+    @objc func displayButtonTapped(){
+        if displayButton.isSelected == true{
+            
+            displayButton.setTitle("隐藏密码", for: .normal)
+            displayButton.isSelected = false
+            
+            textPassWord.isSecureTextEntry = false
+            textPassWordConfirm.isSecureTextEntry = false
+            
+        }
+        else{
+            
+            displayButton.setTitle("显示密码", for: .normal)
+            displayButton.isSelected = true
+            
+            textPassWord.isSecureTextEntry = true
+            textPassWordConfirm.isSecureTextEntry = true
+        }
+    }
+    
+    // 密码不一致响应
+    @objc func passwordDetection(){
+        if textPassWord.text?.elementsEqual(textPassWordConfirm.text!) == true{
+            errorLabel.isHidden = true
+        }
+        else{
+            errorLabel.isHidden = false
         }
     }
     /*
