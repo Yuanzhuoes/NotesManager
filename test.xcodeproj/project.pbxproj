@@ -17,6 +17,7 @@
 		D18F014C266A55A800AEDE59 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */; };
 		D19E8147266B7BC000EC1312 /* ForgotViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E8146266B7BC000EC1312 /* ForgotViewController.swift */; };
 		D19E814F266E512600EC1312 /* TestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E814E266E512500EC1312 /* TestViewController.swift */; };
+		D19E81512670ADA800EC1312 /* Property List.plist in Resources */ = {isa = PBXBuildFile; fileRef = D19E81502670ADA800EC1312 /* Property List.plist */; };
 		DF745E7F869890C69A37F0DA /* libPods-test.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C883B7AC0CE325CE2A945660 /* libPods-test.a */; };
 /* End PBXBuildFile section */
 
@@ -55,6 +56,7 @@
 		D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
 		D19E8146266B7BC000EC1312 /* ForgotViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotViewController.swift; sourceTree = "<group>"; };
 		D19E814E266E512500EC1312 /* TestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestViewController.swift; sourceTree = "<group>"; };
+		D19E81502670ADA800EC1312 /* Property List.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Property List.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -126,6 +128,7 @@
 				D18F010B26665CED00AEDE59 /* AppDelegate.swift */,
 				D18F010D26665CED00AEDE59 /* SceneDelegate.swift */,
 				D18F010F26665CED00AEDE59 /* LoginViewController.swift */,
+				D19E81502670ADA800EC1312 /* Property List.plist */,
 				D19E8146266B7BC000EC1312 /* ForgotViewController.swift */,
 				D18F011126665CED00AEDE59 /* Main.storyboard */,
 				D18F011426665CF100AEDE59 /* Assets.xcassets */,
@@ -244,6 +247,7 @@
 			files = (
 				D18F011826665CF100AEDE59 /* LaunchScreen.storyboard in Resources */,
 				D18F011526665CF100AEDE59 /* Assets.xcassets in Resources */,
+				D19E81512670ADA800EC1312 /* Property List.plist in Resources */,
 				D18F011326665CED00AEDE59 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

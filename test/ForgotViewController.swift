@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Alamofire
 
 class ForgotViewController: UIViewController, UITextFieldDelegate {
 
@@ -23,25 +24,26 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         // 1. 标签显示
         
         // 1.1 注册账号标签显示 如何根据字体大小动态调整frame?
-        let registerLabel = UILabel(frame: CGRect(x: 40, y: 84, width: 128, height: 22))
+        let registerLabel = UILabel()
         registerLabel.text = "忘记密码"
         registerLabel.font = UIFont.systemFont(ofSize: 22)
         registerLabel.textColor = UIColor.init(red: 93/225.0, green: 93/225.0, blue: 93/225.0, alpha: 1)
         self.view.addSubview(registerLabel)
+        registerLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // 1.2 错误信息标签显示 先隐藏了 具体是啥最后填
-        let errorLabel = UILabel(frame: CGRect(x: 40, y: 315, width: 80, height: 32))
+        let errorLabel = UILabel()
         errorLabel.text = "待定"
         errorLabel.font = UIFont.systemFont(ofSize: 12)
         errorLabel.textColor = UIColor.init(red: 220/225.0, green: 102/225.0, blue: 62/225.0, alpha: 1)
         errorLabel.isHidden = true
         self.view.addSubview(errorLabel)
+        errorLabel.translatesAutoresizingMaskIntoConstraints = false
         
         
         // 2. 输入文本框
         // 2.1 邮箱输入
-        textName = UITextField(frame: CGRect(x:0,y:registerLabel.center.y + 70,width:297,height:44))
-        textName.center.x = self.view.center.x
+        textName = UITextField()
         textName.borderStyle = UITextField.BorderStyle.roundedRect
         textName.placeholder = "请输入邮箱"
         textName.returnKeyType = UIReturnKeyType.done // ?
@@ -49,9 +51,7 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         textName.keyboardType = UIKeyboardType.emailAddress // 键盘类型为邮箱
         
         // 2.2 验证码输入
-        textVerify = UITextField(frame: CGRect(x:0,y:0,width:297,height:44))
-        textVerify.center = self.view.center
-        textVerify.center.y = textName.center.y + 54
+        textVerify = UITextField()
         textVerify.borderStyle = UITextField.BorderStyle.roundedRect
         textVerify.placeholder = "请输入验证码"
         textVerify.returnKeyType = UIReturnKeyType.done // ?
@@ -59,9 +59,7 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         textVerify.isSecureTextEntry = true // 是否安全输入 小圆点 和按钮交互
         
         // 2.3 确认密码输入
-        textNewPassWord = UITextField(frame: CGRect(x:0,y:0,width:297,height:44))
-        textNewPassWord.center = self.view.center
-        textNewPassWord.center.y = textVerify.center.y + 54
+        textNewPassWord = UITextField()
         textNewPassWord.borderStyle = UITextField.BorderStyle.roundedRect
         textNewPassWord.placeholder = "请输入新密码"
         textNewPassWord.returnKeyType = UIReturnKeyType.done // ?
@@ -80,12 +78,13 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         self.view.addSubview(textVerify)
         self.view.addSubview(textNewPassWord)
         
+        textName.translatesAutoresizingMaskIntoConstraints = false
+        textVerify.translatesAutoresizingMaskIntoConstraints = false
+        textNewPassWord.translatesAutoresizingMaskIntoConstraints = false
+        
         // 3. 按钮显示
         
         // 3.1 修改按钮
-        modifyButton.frame = CGRect(x: 0, y: 0, width: 297,height: 44)
-        modifyButton.center.x = self.view.center.x
-        modifyButton.center.y = textNewPassWord.center.y + 86
         modifyButton.backgroundColor = UIColor.init(red: 229/255.0, green: 229/255.0, blue: 229/255.0, alpha: 1)
         modifyButton.setTitle("修改", for: .normal)
         modifyButton.setTitleColor(UIColor.white, for: .normal)
@@ -93,11 +92,9 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         // 3.2.1 输入后高亮
         
         self.view.addSubview(modifyButton)
+        modifyButton.translatesAutoresizingMaskIntoConstraints = false
         
         // 3.2 显示-隐藏按钮
-        eyeButton.frame = CGRect(x:0, y:0, width:44, height:44)
-        eyeButton.center.x = textNewPassWord.center.x + 126.5
-        eyeButton.center.y = textNewPassWord.center.y
         eyeButton.setImage(UIImage(named: "EyeOff"), for: .normal)
         // 更改自定义图片的颜色
         eyeButton.tintColor = UIColor(red:170/255.0,green:170/255.0,blue:170/255.0,alpha: 1)
@@ -105,26 +102,101 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         eyeButton.imageEdgeInsets = UIEdgeInsets(top: 28, left:28, bottom:28, right:28)
         eyeButton.addTarget(self, action: #selector(LoginViewController.eyeButtonTapped), for: UIControl.Event.touchUpInside)
         self.view.addSubview(eyeButton)
+        eyeButton.translatesAutoresizingMaskIntoConstraints = false
         
         // 3.3 获取验证码按钮
         let getCodeButton = UIButton(type: .system)
-        getCodeButton.frame = CGRect(x:0, y:0, width:44, height:44)
-        getCodeButton.center.x = textVerify.center.x + 108
-        getCodeButton.center.y = textVerify.center.y + 8
         getCodeButton.setTitle("获取验证码", for: .normal)
         getCodeButton.tintColor = UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1)
         getCodeButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
-        getCodeButton.adjustsImageSizeForAccessibilityContentSizeCategory = true
         // 3.3.1 点击获取验证码
         
         self.view.addSubview(getCodeButton)
+        getCodeButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        // 约束 为什么写在一起，相互之间的顺序才不会有影响，而写在每个控件的后边就不行
+        registerLabel.addConstraint(NSLayoutConstraint(item: registerLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 128))
+        registerLabel.addConstraint(NSLayoutConstraint(item: registerLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 22))
+        self.view.addConstraint(NSLayoutConstraint(item: registerLabel, attribute: .top, relatedBy: .equal, toItem: self.view, attribute: .top, multiplier: 1, constant: 124))
+        self.view.addConstraint(NSLayoutConstraint(item: registerLabel, attribute: .left, relatedBy: .equal, toItem: textName, attribute: .left, multiplier: 1, constant: 0))
+        
+        textName.addConstraint(NSLayoutConstraint(item: textName!, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 297))
+        textName.addConstraint(NSLayoutConstraint(item: textName!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
+        self.view.addConstraint(NSLayoutConstraint(item: textName!, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: textName!, attribute: .top, relatedBy: .equal, toItem: registerLabel, attribute: .bottom, multiplier: 1, constant: 24))
+        
+        textVerify.addConstraint(NSLayoutConstraint(item: textVerify!, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 297))
+        textVerify.addConstraint(NSLayoutConstraint(item: textVerify!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
+        self.view.addConstraint(NSLayoutConstraint(item: textVerify!, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: textVerify!, attribute: .top, relatedBy: .equal, toItem: textName, attribute: .bottom, multiplier: 1, constant: 10))
+        
+        textNewPassWord.addConstraint(NSLayoutConstraint(item: textNewPassWord!, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 297))
+        textNewPassWord.addConstraint(NSLayoutConstraint(item: textNewPassWord!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
+        self.view.addConstraint(NSLayoutConstraint(item: textNewPassWord!, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: textNewPassWord!, attribute: .top, relatedBy: .equal, toItem: textVerify, attribute: .bottom, multiplier: 1, constant: 10))
+        
+        getCodeButton.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 80))
+        getCodeButton.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
+        self.view.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .right, relatedBy: .equal, toItem: textVerify, attribute: .right, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .top, relatedBy: .equal, toItem: textVerify, attribute: .top, multiplier: 1, constant: 0))
+        
+        eyeButton.addConstraint(NSLayoutConstraint(item: eyeButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
+        eyeButton.addConstraint(NSLayoutConstraint(item: eyeButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
+        self.view.addConstraint(NSLayoutConstraint(item: eyeButton, attribute: .top, relatedBy: .equal, toItem: textNewPassWord, attribute: .top, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: eyeButton, attribute: .right, relatedBy: .equal, toItem: textNewPassWord, attribute: .right, multiplier: 1, constant: 0))
+        
+        errorLabel.addConstraint(NSLayoutConstraint(item: errorLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 80))
+        errorLabel.addConstraint(NSLayoutConstraint(item: errorLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 32))
+        self.view.addConstraint(NSLayoutConstraint(item: errorLabel, attribute: .top, relatedBy: .equal, toItem: textNewPassWord, attribute: .bottom, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: errorLabel, attribute: .left, relatedBy: .equal, toItem: textNewPassWord, attribute: .left, multiplier: 1, constant: 0))
+        
+        modifyButton.addConstraint(NSLayoutConstraint(item: modifyButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 297))
+        modifyButton.addConstraint(NSLayoutConstraint(item: modifyButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
+        self.view.addConstraint(NSLayoutConstraint(item: modifyButton, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: modifyButton, attribute: .top, relatedBy: .equal, toItem: textNewPassWord, attribute: .bottom, multiplier: 1, constant: 40))
+        
+        // api测试
+        getVerifyCode { ServerDescription in
+            
+        }
     }
     
     func textFieldShouldReturn(_ textName: UITextField) -> Bool {
         textName.resignFirstResponder()
         return true
     }
-    
+    struct Data: Codable{
+        let token: String?
+    }
+    struct Error: Codable {
+        let code: String?
+        let info: String?
+        let message: String?
+    }
+    struct ServerDescription: Codable {
+        let data: Data?
+        let error: Error?
+        let success: Bool?
+    }
+    //
+    func getVerifyCode(completion: @escaping (ServerDescription)->Void) {
+        let parameters: [String: String] = [
+            "email": "443172997@qq.com",
+            //"password": "l19960118"
+        ]
+
+        let url = "http://47.96.170.11/api/v1/user/password/reset"
+        AF.request(url, method: .post, parameters: parameters).responseJSON {
+            response in
+            switch response.result {
+            case .success(let code):
+                   print(code)
+            case .failure(let error):
+                print(error)
+            }
+        }
+
+    }
     @objc func textValueChanged(){
         if textName.text?.isEmpty == false && textVerify.text?.isEmpty == false && textNewPassWord.text?.isEmpty == false {
             modifyButton.backgroundColor = UIColor.init(red:54/255.0, green:181/255.0, blue:157/255.0,alpha: 1)
