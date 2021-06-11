@@ -13,7 +13,8 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     var textName:UITextField!
     var textPassWord:UITextField!
     var textPassWordConfirm:UITextField!
-    var errorLabel: UILabel!
+    // var errorLabel: UILabel! 区别？
+    var errorLabel = UILabel()
     let displayButton = UIButton(type: .custom)
     var registerButton = UIButton(type: .system)
     
@@ -154,12 +155,10 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
         self.view.addConstraint(NSLayoutConstraint(item: displayButton, attribute: .top, relatedBy: .equal, toItem: textPassWordConfirm, attribute: .bottom, multiplier: 1, constant: 0))
         self.view.addConstraint(NSLayoutConstraint(item: displayButton, attribute: .right, relatedBy: .equal, toItem: textPassWordConfirm, attribute: .right, multiplier: 1, constant: 0))
         
-        errorLabel.addConstraint(NSLayoutConstraint(item: errorLabel!, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 120))
-        errorLabel.addConstraint(NSLayoutConstraint(item: errorLabel!, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 32))
-        self.view.addConstraint(NSLayoutConstraint(item: errorLabel!, attribute: .top, relatedBy: .equal, toItem: textPassWordConfirm, attribute: .bottom, multiplier: 1, constant: 0))
-        self.view.addConstraint(NSLayoutConstraint(item: errorLabel!, attribute: .left, relatedBy: .equal, toItem: textPassWordConfirm, attribute: .left, multiplier: 1, constant: 0))
-        
-        
+        errorLabel.addConstraint(NSLayoutConstraint(item: errorLabel, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 120))
+        errorLabel.addConstraint(NSLayoutConstraint(item: errorLabel, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 32))
+        self.view.addConstraint(NSLayoutConstraint(item: errorLabel, attribute: .top, relatedBy: .equal, toItem: textPassWordConfirm, attribute: .bottom, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: errorLabel, attribute: .left, relatedBy: .equal, toItem: textPassWordConfirm, attribute: .left, multiplier: 1, constant: 0))
     }
     
     func textFieldShouldReturn(_ textName: UITextField) -> Bool {
@@ -184,7 +183,7 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     func registerResponse(completion: @escaping (ServerDescription)->Void) {
         let parameters: [String: String] = [
             "email": textName.text!,
-            "password": textPassWord.text!,
+            "password": textPassWord.text!
         ]
         let url = "http://47.96.170.11/api/v1/user/register"
         AF.request(url, method: .post, parameters: parameters).responseJSON {

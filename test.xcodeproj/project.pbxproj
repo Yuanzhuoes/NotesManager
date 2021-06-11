@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		D139CA9E26733BF80066E456 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139CA9D26733BF80066E456 /* global.swift */; };
 		D18F010C26665CED00AEDE59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F010B26665CED00AEDE59 /* AppDelegate.swift */; };
 		D18F010E26665CED00AEDE59 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F010D26665CED00AEDE59 /* SceneDelegate.swift */; };
 		D18F011026665CED00AEDE59 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F010F26665CED00AEDE59 /* LoginViewController.swift */; };
@@ -42,6 +43,7 @@
 		03C837E61A0E1A9A830B8C4D /* Pods-test.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-test.debug.xcconfig"; path = "Target Support Files/Pods-test/Pods-test.debug.xcconfig"; sourceTree = "<group>"; };
 		A4E581CA2CE330A2BB560693 /* Pods-test.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-test.release.xcconfig"; path = "Target Support Files/Pods-test/Pods-test.release.xcconfig"; sourceTree = "<group>"; };
 		C883B7AC0CE325CE2A945660 /* libPods-test.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-test.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		D139CA9D26733BF80066E456 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
 		D18F010826665CED00AEDE59 /* test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = test.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D18F010B26665CED00AEDE59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		D18F010D26665CED00AEDE59 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -137,6 +139,7 @@
 				D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */,
 				D19E814E266E512500EC1312 /* TestViewController.swift */,
 				D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */,
+				D139CA9D26733BF80066E456 /* global.swift */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -298,6 +301,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D139CA9E26733BF80066E456 /* global.swift in Sources */,
 				D19E814F266E512600EC1312 /* TestViewController.swift in Sources */,
 				D18F011026665CED00AEDE59 /* LoginViewController.swift in Sources */,
 				D18F010C26665CED00AEDE59 /* AppDelegate.swift in Sources */,

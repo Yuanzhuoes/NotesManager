@@ -174,14 +174,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     // 键盘遮挡问题？
     
-    // 邮箱格式检测
-    func validateEmail(email: String) -> Bool {
-
-        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
-        let emailTest:NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
-        return emailTest.evaluate(with: email)
-        
-    }
     // 装入解析后的JSON,用于interactive,有简单的写法吗？
     struct Data: Codable{
         let token: String?

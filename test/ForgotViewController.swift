@@ -13,9 +13,11 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
     var textName:UITextField!
     var textVerify:UITextField!
     var textNewPassWord:UITextField!
+    let getCodeButton = UIButton(type: .custom) // custom
     let modifyButton = UIButton(type: .system)
     let eyeButton = UIButton(type: .custom)
-    
+    let errorLabel = UILabel()
+    var countdownTimer: Timer?
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -32,8 +34,6 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         registerLabel.translatesAutoresizingMaskIntoConstraints = false
         
         // 1.2 错误信息标签显示 先隐藏了 具体是啥最后填
-        let errorLabel = UILabel()
-        errorLabel.text = "待定"
         errorLabel.font = UIFont.systemFont(ofSize: 12)
         errorLabel.textColor = UIColor.init(red: 220/225.0, green: 102/225.0, blue: 62/225.0, alpha: 1)
         errorLabel.isHidden = true
@@ -55,20 +55,30 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         textVerify.borderStyle = UITextField.BorderStyle.roundedRect
         textVerify.placeholder = "请输入验证码"
         textVerify.returnKeyType = UIReturnKeyType.done // ?
-        textVerify.keyboardType = UIKeyboardType.default // 键盘类型为邮箱
-        textVerify.isSecureTextEntry = true // 是否安全输入 小圆点 和按钮交互
+        textVerify.keyboardType = UIKeyboardType.emailAddress // 键盘类型为邮箱
+        // 关闭默认大小写
+        textVerify.autocapitalizationType = UITextAutocapitalizationType.none
+
         
         // 2.3 确认密码输入
         textNewPassWord = UITextField()
         textNewPassWord.borderStyle = UITextField.BorderStyle.roundedRect
         textNewPassWord.placeholder = "请输入新密码"
         textNewPassWord.returnKeyType = UIReturnKeyType.done // ?
-        textNewPassWord.keyboardType = UIKeyboardType.default // 键盘类型为邮箱
+        textNewPassWord.keyboardType = UIKeyboardType.emailAddress // 键盘类型为邮箱
         textNewPassWord.isSecureTextEntry = true // 是否安全输入 小圆点 和按钮交互
         
+        // 输入->修改按钮高亮
         textName.addTarget(self, action: #selector(ForgotViewController.textValueChanged), for: UIControl.Event.editingChanged)
         textVerify.addTarget(self, action: #selector(ForgotViewController.textValueChanged), for: UIControl.Event.editingChanged)
         textNewPassWord.addTarget(self, action: #selector(ForgotViewController.textValueChanged), for: UIControl.Event.editingChanged)
+        
+        //邮箱输入->获取验证码高亮
+        textName.addTarget(self, action: #selector(getCodeEnable), for: UIControl.Event.editingChanged)
+        
+        //提示标签重置
+        textName.addTarget(self, action: #selector(LoginViewController.resetErrorLabel), for: .editingChanged)
+        textNewPassWord.addTarget(self, action: #selector(LoginViewController.resetErrorLabel), for: .editingChanged)
         
         textName.delegate = self
         textVerify.delegate = self
@@ -89,8 +99,7 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         modifyButton.setTitle("修改", for: .normal)
         modifyButton.setTitleColor(UIColor.white, for: .normal)
         modifyButton.isEnabled = false
-        // 3.2.1 输入后高亮
-        
+        modifyButton.addTarget(self, action: #selector(loginPage), for: .touchUpInside)
         self.view.addSubview(modifyButton)
         modifyButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -105,12 +114,14 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         eyeButton.translatesAutoresizingMaskIntoConstraints = false
         
         // 3.3 获取验证码按钮
-        let getCodeButton = UIButton(type: .system)
         getCodeButton.setTitle("获取验证码", for: .normal)
-        getCodeButton.tintColor = UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1)
+        getCodeButton.setTitleColor(UIColor(red:142/255.0,green:142/255.0,blue:142/255.0,alpha: 1), for: .normal)
+        // 字体右对齐
+        getCodeButton.contentHorizontalAlignment = UIControl.ContentHorizontalAlignment.right
         getCodeButton.titleLabel?.font = UIFont.systemFont(ofSize: 12)
+        getCodeButton.isEnabled = false
         // 3.3.1 点击获取验证码
-        
+        getCodeButton.addTarget(self, action: #selector(getCode), for: .touchUpInside)
         self.view.addSubview(getCodeButton)
         getCodeButton.translatesAutoresizingMaskIntoConstraints = false
         
@@ -135,9 +146,9 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         self.view.addConstraint(NSLayoutConstraint(item: textNewPassWord!, attribute: .centerX, relatedBy: .equal, toItem: self.view, attribute: .centerX, multiplier: 1, constant: 0))
         self.view.addConstraint(NSLayoutConstraint(item: textNewPassWord!, attribute: .top, relatedBy: .equal, toItem: textVerify, attribute: .bottom, multiplier: 1, constant: 10))
         
-        getCodeButton.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 80))
+        getCodeButton.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 120))
         getCodeButton.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
-        self.view.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .right, relatedBy: .equal, toItem: textVerify, attribute: .right, multiplier: 1, constant: 0))
+        self.view.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .right, relatedBy: .equal, toItem: textVerify, attribute: .right, multiplier: 1, constant: -6))
         self.view.addConstraint(NSLayoutConstraint(item: getCodeButton, attribute: .top, relatedBy: .equal, toItem: textVerify, attribute: .top, multiplier: 1, constant: 0))
         
         eyeButton.addConstraint(NSLayoutConstraint(item: eyeButton, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 0,constant: 44))
@@ -156,9 +167,7 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         self.view.addConstraint(NSLayoutConstraint(item: modifyButton, attribute: .top, relatedBy: .equal, toItem: textNewPassWord, attribute: .bottom, multiplier: 1, constant: 40))
         
         // api测试
-        getVerifyCode { ServerDescription in
-            
-        }
+        // getVerifyCode { ServerDescription in }
     }
     
     func textFieldShouldReturn(_ textName: UITextField) -> Bool {
@@ -179,24 +188,81 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         let success: Bool?
     }
     //
-    func getVerifyCode(completion: @escaping (ServerDescription)->Void) {
-        let parameters: [String: String] = [
-            "email": "443172997@qq.com",
-            //"password": "l19960118"
-        ]
-
-        let url = "http://47.96.170.11/api/v1/user/password/reset"
-        AF.request(url, method: .post, parameters: parameters).responseJSON {
+    func verifyCodeResponse(completion: @escaping (ServerDescription)->Void) {
+        let parameters: [String: String] = ["email": textName.text!]
+        // 获取验证码接口
+        let url = "http://47.96.170.11/api/v1/user/password/reset/verify_code"
+        // 重置接口
+        // let url = "http://47.96.170.11/api/v1/user/password/reset"
+        AF.request(url, method: .get, parameters: parameters).responseJSON {
             response in
             switch response.result {
-            case .success(let code):
-                   print(code)
+            case .success(let json):
+                guard let data = response.data else { return }
+                do {
+                    let ServerDescription = try JSONDecoder().decode(ServerDescription.self, from: data)
+                    completion(ServerDescription)
+                    print(json)
+                }
+                catch let jsonErr {
+                        print("json 解析出错 : ", jsonErr)
+                }
             case .failure(let error):
                 print(error)
             }
         }
 
     }
+    
+    func resetResponse(completion: @escaping (ServerDescription)->Void) {
+        // 不需要token也可以重置密码，但需要加上email
+        // 用token需要在登陆和注册的时候将服务器返回的token保存在本地，且不需要email
+        // 所以为什么要用token
+        let parameters: [String: String] = [
+            //"email": textName.text!,
+            "new_password": textNewPassWord.text!,
+            "verify_code": textVerify.text!
+        ]
+
+        let url = "http://47.96.170.11/api/v1/user/password/reset"
+        //, headers: headers
+        AF.request(url, method: .post, parameters: parameters).responseJSON {
+            response in
+            switch response.result {
+            case .success(let json):
+                guard let data = response.data else { return }
+                do {
+                    let ServerDescription = try JSONDecoder().decode(ServerDescription.self, from: data)
+                    completion(ServerDescription)
+                    print(json)
+                }
+                catch let jsonErr {
+                        print("json 解析出错 : ", jsonErr)
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
+
+    }
+    
+    @objc func loginPage(){
+        resetResponse { [self] ServerDescription in
+            if ServerDescription.success!{
+                self.navigationController?.popToRootViewController(animated: false)
+            }
+            else {
+                if ServerDescription.error?.code == "verify_code_invalid_verify_code"{
+                    errorLabel.text = "无效验证码"
+                    errorLabel.isHidden = false
+                }
+                else if ServerDescription.error?.code == "user_invalid_password_length"{
+                    errorLabel.text = "密码长度大于8字符哦"
+                }
+            }
+        }
+    }
+    
     @objc func textValueChanged(){
         if textName.text?.isEmpty == false && textVerify.text?.isEmpty == false && textNewPassWord.text?.isEmpty == false {
             modifyButton.backgroundColor = UIColor.init(red:54/255.0, green:181/255.0, blue:157/255.0,alpha: 1)
@@ -221,6 +287,78 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
             textNewPassWord.isSecureTextEntry = false
         }
     }
+    // 倒计时
+    var remainingSeconds: Int = 0 {
+        willSet {
+            getCodeButton.setTitle("\(newValue)秒后重新获取", for: .normal)
+            getCodeButton.setTitleColor(UIColor(red:142/255.0,green:142/255.0,blue:142/255.0,alpha: 1), for: .normal)
+                
+            if newValue <= 0 {
+                getCodeButton.setTitle("重新获取验证码", for: .normal)
+                getCodeButton.setTitleColor(UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1), for: .normal)
+                isCounting = false
+            }
+        }
+    }
+    
+    var isCounting = false {
+        willSet {
+            if newValue {
+                countdownTimer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(TestViewController.updateTime), userInfo: nil, repeats: true)
+                
+                remainingSeconds = 30
+            } else {
+                countdownTimer?.invalidate()
+                countdownTimer = nil
+            }
+            getCodeButton.isEnabled = !newValue
+        }
+    }
+    
+    @objc func updateTime(timer: Timer) {
+         // 计时开始时，逐秒减少remainingSeconds的值
+        remainingSeconds -= 1
+    }
+    // 邮箱有输入，激活按钮
+    @objc func getCodeEnable(){
+        if textName.text?.isEmpty == true {
+            getCodeButton.isEnabled = false;
+            getCodeButton.setTitleColor(UIColor(red:142/255.0,green:142/255.0,blue:142/255.0,alpha: 1), for: .normal)
+        }
+        else{
+            getCodeButton.isEnabled = true
+            getCodeButton.setTitleColor(UIColor(red:54/255.0,green:181/255.0,blue:157/255.0,alpha: 1), for: .normal)
+        }
+    }
+    
+    @objc func getCode(){
+        verifyCodeResponse { [self] ServerDescription in
+            if ServerDescription.success!{
+                errorLabel.text = "验证码已发送"
+                errorLabel.isHidden = false
+                // 按钮灰，倒计时，计时完变色，可重发验证码
+                isCounting = true
+            }
+            else{
+                // 气泡提示？
+                if ServerDescription.error?.code == "user_invalid_email_format"{
+                    errorLabel.text = "邮箱格式错误"
+                }
+                else if ServerDescription.error?.code == "user_invalid_user"{
+                    errorLabel.text = "该用户不存在"
+                }
+                errorLabel.isHidden = false
+            }
+        }
+    }
+    
+    // 标签重置响应
+    @objc func resetErrorLabel(){
+        if (errorLabel.isHidden == false){
+            errorLabel.isHidden = true
+        }
+    }
+    
 }
     
 
