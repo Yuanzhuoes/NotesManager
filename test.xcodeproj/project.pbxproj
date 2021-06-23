@@ -17,8 +17,6 @@
 		D18F014A266A2DA000AEDE59 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */; };
 		D18F014C266A55A800AEDE59 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */; };
 		D19E8147266B7BC000EC1312 /* ForgotViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E8146266B7BC000EC1312 /* ForgotViewController.swift */; };
-		D19E814F266E512600EC1312 /* TestViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E814E266E512500EC1312 /* TestViewController.swift */; };
-		D19E81512670ADA800EC1312 /* Property List.plist in Resources */ = {isa = PBXBuildFile; fileRef = D19E81502670ADA800EC1312 /* Property List.plist */; };
 		DF745E7F869890C69A37F0DA /* libPods-test.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C883B7AC0CE325CE2A945660 /* libPods-test.a */; };
 /* End PBXBuildFile section */
 
@@ -57,8 +55,6 @@
 		D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
 		D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
 		D19E8146266B7BC000EC1312 /* ForgotViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotViewController.swift; sourceTree = "<group>"; };
-		D19E814E266E512500EC1312 /* TestViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestViewController.swift; sourceTree = "<group>"; };
-		D19E81502670ADA800EC1312 /* Property List.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Property List.plist"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -130,14 +126,12 @@
 				D18F010B26665CED00AEDE59 /* AppDelegate.swift */,
 				D18F010D26665CED00AEDE59 /* SceneDelegate.swift */,
 				D18F010F26665CED00AEDE59 /* LoginViewController.swift */,
-				D19E81502670ADA800EC1312 /* Property List.plist */,
 				D19E8146266B7BC000EC1312 /* ForgotViewController.swift */,
 				D18F011126665CED00AEDE59 /* Main.storyboard */,
 				D18F011426665CF100AEDE59 /* Assets.xcassets */,
 				D18F011626665CF100AEDE59 /* LaunchScreen.storyboard */,
 				D18F011926665CF100AEDE59 /* Info.plist */,
 				D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */,
-				D19E814E266E512500EC1312 /* TestViewController.swift */,
 				D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */,
 				D139CA9D26733BF80066E456 /* global.swift */,
 			);
@@ -155,6 +149,7 @@
 				D18F010426665CED00AEDE59 /* Sources */,
 				D18F010526665CED00AEDE59 /* Frameworks */,
 				D18F010626665CED00AEDE59 /* Resources */,
+				D1B78CF22681BBFF00781A74 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -250,7 +245,6 @@
 			files = (
 				D18F011826665CF100AEDE59 /* LaunchScreen.storyboard in Resources */,
 				D18F011526665CF100AEDE59 /* Assets.xcassets in Resources */,
-				D19E81512670ADA800EC1312 /* Property List.plist in Resources */,
 				D18F011326665CED00AEDE59 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -294,6 +288,23 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
+		D1B78CF22681BBFF00781A74 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\nif which \"${PODS_ROOT}/SwiftLint/swiftlint\" >/dev/null; then\n  \"${PODS_ROOT}/SwiftLint/swiftlint\"\nelse\n  echo \"warning: SwiftLint not installed, download from https://github.com/realm/SwiftLint\"\nfi\n";
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -302,7 +313,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				D139CA9E26733BF80066E456 /* global.swift in Sources */,
-				D19E814F266E512600EC1312 /* TestViewController.swift in Sources */,
 				D18F011026665CED00AEDE59 /* LoginViewController.swift in Sources */,
 				D18F010C26665CED00AEDE59 /* AppDelegate.swift in Sources */,
 				D18F010E26665CED00AEDE59 /* SceneDelegate.swift in Sources */,

@@ -1,2 +1,4 @@
 target 'test'
 pod 'Alamofire', '~>5.4.3'
+pod 'SwiftLint'
+pod 'SnapKit'
