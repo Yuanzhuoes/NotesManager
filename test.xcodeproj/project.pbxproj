@@ -17,6 +17,7 @@
 		D18F014A266A2DA000AEDE59 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */; };
 		D18F014C266A55A800AEDE59 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */; };
 		D19E8147266B7BC000EC1312 /* ForgotViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E8146266B7BC000EC1312 /* ForgotViewController.swift */; };
+		D1B78CF626845B0F00781A74 /* MyTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B78CF526845B0E00781A74 /* MyTableViewCell.swift */; };
 		DF745E7F869890C69A37F0DA /* libPods-test.a in Frameworks */ = {isa = PBXBuildFile; fileRef = C883B7AC0CE325CE2A945660 /* libPods-test.a */; };
 /* End PBXBuildFile section */
 
@@ -55,6 +56,7 @@
 		D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
 		D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
 		D19E8146266B7BC000EC1312 /* ForgotViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotViewController.swift; sourceTree = "<group>"; };
+		D1B78CF526845B0E00781A74 /* MyTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MyTableViewCell.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -134,6 +136,7 @@
 				D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */,
 				D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */,
 				D139CA9D26733BF80066E456 /* global.swift */,
+				D1B78CF526845B0E00781A74 /* MyTableViewCell.swift */,
 			);
 			path = test;
 			sourceTree = "<group>";
@@ -313,6 +316,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D139CA9E26733BF80066E456 /* global.swift in Sources */,
+				D1B78CF626845B0F00781A74 /* MyTableViewCell.swift in Sources */,
 				D18F011026665CED00AEDE59 /* LoginViewController.swift in Sources */,
 				D18F010C26665CED00AEDE59 /* AppDelegate.swift in Sources */,
 				D18F010E26665CED00AEDE59 /* SceneDelegate.swift in Sources */,

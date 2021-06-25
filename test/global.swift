@@ -94,6 +94,23 @@ class LineTextField: UITextField {
             UIGraphicsBeginImageContextWithOptions(rect.size, true, 0)
         }
 }
+// 自定义警告窗口 KVC运行时访问和修改对象属性
+class MyAlertController: UIAlertController {
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        let attributedString = NSAttributedString(string: self.message!, attributes: [
+            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 15),
+            NSAttributedString.Key.foregroundColor: MyColor.textColor])
+        self.setValue(attributedString, forKey: "attributedMessage")
+    }
+    override func addAction(_ action: UIAlertAction ) {
+        super.addAction(action)
+        // 通过tintColor实现按钮颜色的修改。
+        self.view.tintColor = MyColor.greenColor
+//        也可以通过设置 action.setValue 来实现
+//        action.setValue(UIColor.orange, forKey: "titleTextColor")
+    }
+}
 // 十六进制颜色转换 枚举作为命名空间 枚举不能是存储属性 所以必须加static
 enum MyColor {
     static let placeHolderColor = UIColor(hexColor: "aaaaaa")
@@ -130,3 +147,19 @@ extension UIColor {
         self.init(red: redCGF, green: greenCGF, blue: blueCGF, alpha: 1)
     }
 }
+// 扩展string
+extension String {
+// 富文本设置 行间距 字间距
+    // 按需要可以设置所有的属性 字体 颜色 大小等
+    func attributedString(lineSpaceing: CGFloat, lineBreakModel: NSLineBreakMode) -> NSAttributedString {
+        let style = NSMutableParagraphStyle()
+        style.lineSpacing = lineSpaceing
+        style.lineBreakMode = lineBreakModel
+        let attributes = [NSAttributedString.Key.paragraphStyle: style]
+            as [NSAttributedString.Key: Any]
+        let attrStr = NSMutableAttributedString.init(string: self, attributes: attributes)
+        return attrStr
+    }
+}
+// 模拟数据
+var dataSuorceArrary = ["哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈hahahahah", "你好", "a", "b", "c", "d"]

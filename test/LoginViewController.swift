@@ -16,6 +16,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     let loginButton = UIButton(type: .system)
     let eyeButton = UIButton(type: .custom)
     let forgotButton = UIButton(type: .system)
+    let logSuccessBubble = UIAlertController(title: "", message: "登录成功", preferredStyle: .alert)
     // 页面禁止横屏，如果横屏幕还要考虑键盘遮挡问题？
     override func viewDidLoad() {
         // 父类初始化
@@ -45,6 +46,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         textName.returnKeyType = UIReturnKeyType.done // returnKey title is done
         textName.clearButtonMode = UITextField.ViewMode.never // 编辑时显示删除图标
         textName.keyboardType = UIKeyboardType.emailAddress // 键盘类型为邮箱
+        textName.text = "443172997@qq.com"
         // 光标颜色
         textName.tintColor = MyColor.greenColor
         textName.textColor = MyColor.textColor
@@ -57,6 +59,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         textPassWord.isSecureTextEntry = true // 是否安全输入 默认为true
         textPassWord.tintColor = MyColor.greenColor
         textPassWord.textColor = MyColor.textColor
+        textPassWord.text = "l19960118"
         // 响应
         textName.addTarget(self, action: #selector(LoginViewController.textValueChanged), for: .editingChanged)
         textPassWord.addTarget(self, action: #selector(LoginViewController.textValueChanged), for: .editingChanged)
@@ -72,7 +75,8 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         loginButton.backgroundColor = MyColor.buttonDisabledColor
         loginButton.setTitle("登陆", for: .normal)
         loginButton.setTitleColor(UIColor.white, for: .normal)
-        loginButton.isEnabled = false
+        // 测试改动
+        loginButton.isEnabled = true
         // 圆角弧度
         loginButton.layer.cornerRadius = 5
         // 转入登陆界面
@@ -102,6 +106,14 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         errorLabel.textColor = MyColor.errorColor
         errorLabel.isHidden = true
         self.view.addSubview(errorLabel)
+        myConstraints()
+    }
+    // 代理方法，响应returnkey点击，回收键盘
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
+    }
+    func myConstraints() {
         // 约束：以线性方程式的解来确定两个矩形之间的距离关系。 distance(x1, x2) = x2 * a + c
         loginView.snp.makeConstraints { (make) -> Void in
             make.width.equalTo(192)
@@ -139,11 +151,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             make.top.equalTo(textPassWord.snp.bottom)
         }
     }
-    // 代理方法，响应returnkey点击，回收键盘
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        return true
-    }
     // 导航响应的方法，视图入栈
     @objc func registerPage() {
         let viewController = RegisterViewController()
@@ -163,19 +170,22 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     @objc func welcomePage() {
         if validateEmail(email: textName.text!) {
             requestAndResponse(email: textName.text, pwd: textPassWord.text,
-                               function: .login, method: .post) { [weak self] serverDescription in
+                               function: .login, method: .post) { [self] serverDescription in
                 if serverDescription.success! {
                     let viewController = WelcomeViewController()
-                    self?.textPassWord.text = ""
-                    self?.navigationController?.pushViewController(viewController, animated: false)
+                    textPassWord.text = ""
+                    navigationController?.pushViewController(viewController, animated: false)
+                    // 气泡显示
+                    present(logSuccessBubble, animated: true, completion: nil)
+                    perform(#selector(dismissHelper), with: logSuccessBubble, afterDelay: 1.0)
                 } else {
                     if serverDescription.error?.code == "user_invalid_user" {
-                        self?.errorLabel.text = "账号错误"
-                        self?.errorLabel.isHidden = false
+                        errorLabel.text = "账号错误"
+                        errorLabel.isHidden = false
                     } else if serverDescription.error?.code == "user_invalid_password_length"
                                 || serverDescription.error?.code == "user_invalid_password" {
-                        self?.errorLabel.text = "密码错误"
-                        self?.errorLabel.isHidden = false
+                        errorLabel.text = "密码错误"
+                        errorLabel.isHidden = false
                     }
                 }
             }
@@ -185,6 +195,10 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
             errorLabel.text = "邮箱格式错误"
             errorLabel.isHidden = false
         }
+    }
+    // 气泡延时消失
+    @objc func dismissHelper() {
+        logSuccessBubble.dismiss(animated: true, completion: nil)
     }
     // 文本框响应方法，登陆按钮变色
     @objc func textValueChanged() {

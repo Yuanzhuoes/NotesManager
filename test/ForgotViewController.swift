@@ -19,7 +19,6 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
     // 声明一个闭包类型，没有默认的定义，需要调用的时候自定义
     typealias MyClosure = (_ text: String) -> Void
     var myClosure: MyClosure?
-
     override func viewDidLoad() {
         super.viewDidLoad()
 
