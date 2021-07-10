@@ -196,33 +196,33 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
     // 欢迎界面响应
     @objc func welcomePage() {
         // Client先检测两次密码是否一致，一致再进入服务器验证阶段
-        if textPassWord.text?.elementsEqual(textPassWordConfirm.text!) == true {
-            errorLabel.isHidden = true
-            requestAndResponse(email: textName.text, pwd: textPassWord.text,
-                               function: .register, method: .post) { [weak self] serverDescription in
-                if serverDescription.success! {
-                    let viewController = WelcomeViewController()
-                    self?.navigationController?.pushViewController(viewController, animated: false)
-                } else {
-                    if serverDescription.error?.code == "user_invalid_email_format"{
-                        self?.errorLabel.text = "邮箱格式错误"
-                        self?.errorLabel.isHidden = false
-                        // 高亮邮箱
-                    } else if serverDescription.error?.code == "user_existed_email"{
-                        self?.errorLabel.text = "邮箱已注册"
-                        self?.errorLabel.isHidden = false
-                        // 高亮邮箱
-                    } else if serverDescription.error?.code == "user_invalid_password_length"{
-                        self?.errorLabel.text = "密码最少为8字符哦"
-                        self?.errorLabel.isHidden = false
-                        // 高亮密码
-                    }
-                }
-            }
-        } else {
-            errorLabel.text = "密码不一致"
-            errorLabel.isHidden = false
-        }
+//        if textPassWord.text?.elementsEqual(textPassWordConfirm.text!) == true {
+//            errorLabel.isHidden = true
+//            requestAndResponse(email: textName.text, pwd: textPassWord.text,
+//                               function: .register, method: .post) { [weak self] serverDescription in
+//                if serverDescription.success! {
+//                    let viewController = WelcomeViewController()
+//                    self?.navigationController?.pushViewController(viewController, animated: false)
+//                } else {
+//                    if serverDescription.error?.code == "user_invalid_email_format"{
+//                        self?.errorLabel.text = "邮箱格式错误"
+//                        self?.errorLabel.isHidden = false
+//                        // 高亮邮箱
+//                    } else if serverDescription.error?.code == "user_existed_email"{
+//                        self?.errorLabel.text = "邮箱已注册"
+//                        self?.errorLabel.isHidden = false
+//                        // 高亮邮箱
+//                    } else if serverDescription.error?.code == "user_invalid_password_length"{
+//                        self?.errorLabel.text = "密码最少为8字符哦"
+//                        self?.errorLabel.isHidden = false
+//                        // 高亮密码
+//                    }
+//                }
+//            }
+//        } else {
+//            errorLabel.text = "密码不一致"
+//            errorLabel.isHidden = false
+//        }
     }
     // 注册按钮变色响应
     @objc func textValueChanged() {

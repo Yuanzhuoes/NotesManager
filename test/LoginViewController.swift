@@ -4,7 +4,6 @@
 //
 //  Created by 李远卓 on 2021/6/1.
 //
-
 import UIKit
 import SnapKit
 
@@ -22,6 +21,29 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         // 父类初始化
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        // open and connect database
+        do {
+            try DBManager.db?.createTable(table: SQLNote.self)
+        } catch {
+            print(DBManager.db?.errorMessage as Any)
+        }
+        // 请求网络获取所有笔记
+        let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+        let userInfo = UserInfo(authorization: jwt)
+        requestAndResponse(userInfo: userInfo, function: .getAllNotes, method: .get) { serverDescription in
+            guard let response = serverDescription.items else {
+                print("error download notes")
+                return
+            }
+            // 写入数据库
+            insertAllNotesToDB(notes: response) // update
+            // 读取所有笔记到缓存
+            do {
+                notes = try DBManager.db?.queryAllSQLNotes()
+            } catch {
+                print(DBManager.db?.errorMessage as Any)
+            }
+        }
         // 导航控制器设置
         self.view.backgroundColor = UIColor.white
         // 当前页和返回页字符不显示
@@ -46,7 +68,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         textName.returnKeyType = UIReturnKeyType.done // returnKey title is done
         textName.clearButtonMode = UITextField.ViewMode.never // 编辑时显示删除图标
         textName.keyboardType = UIKeyboardType.emailAddress // 键盘类型为邮箱
-        textName.text = "443172997@qq.com"
         // 光标颜色
         textName.tintColor = MyColor.greenColor
         textName.textColor = MyColor.textColor
@@ -59,7 +80,6 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         textPassWord.isSecureTextEntry = true // 是否安全输入 默认为true
         textPassWord.tintColor = MyColor.greenColor
         textPassWord.textColor = MyColor.textColor
-        textPassWord.text = "l19960118"
         // 响应
         textName.addTarget(self, action: #selector(LoginViewController.textValueChanged), for: .editingChanged)
         textPassWord.addTarget(self, action: #selector(LoginViewController.textValueChanged), for: .editingChanged)
@@ -107,6 +127,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         errorLabel.isHidden = true
         self.view.addSubview(errorLabel)
         myConstraints()
+        // 测试
+        textName.text = "fffgrdcc@163.com"
+        textPassWord.text = "123456"
     }
     // 代理方法，响应returnkey点击，回收键盘
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
@@ -168,32 +191,23 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         self.navigationController?.pushViewController(viewController, animated: true)
     }
     @objc func welcomePage() {
-        if validateEmail(email: textName.text!) {
-            requestAndResponse(email: textName.text, pwd: textPassWord.text,
-                               function: .login, method: .post) { [self] serverDescription in
-                if serverDescription.success! {
-                    let viewController = WelcomeViewController()
-                    textPassWord.text = ""
-                    navigationController?.pushViewController(viewController, animated: false)
-                    // 气泡显示
-                    present(logSuccessBubble, animated: true, completion: nil)
-                    perform(#selector(dismissHelper), with: logSuccessBubble, afterDelay: 1.0)
-                } else {
-                    if serverDescription.error?.code == "user_invalid_user" {
-                        errorLabel.text = "账号错误"
-                        errorLabel.isHidden = false
-                    } else if serverDescription.error?.code == "user_invalid_password_length"
-                                || serverDescription.error?.code == "user_invalid_password" {
-                        errorLabel.text = "密码错误"
-                        errorLabel.isHidden = false
-                    }
-                }
+        let userInfo = UserInfo(email: textName.text, pwd: textPassWord.text)
+        requestAndResponse(userInfo: userInfo,
+                           function: .login, method: .post) { [self] serverDescription in
+            if serverDescription.message == "背单词服务出错：账号或密码错误。" {
+                errorLabel.text = "账号或密码错误"
+                errorLabel.isHidden = false
+            } else {
+                // 保存jwt
+                let jwt = serverDescription.jwt
+                userDefault.set(jwt, forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+                let viewController = WelcomeViewController()
+                textPassWord.text = ""
+                navigationController?.pushViewController(viewController, animated: false)
+                // 气泡显示
+                present(logSuccessBubble, animated: true, completion: nil)
+                perform(#selector(dismissHelper), with: logSuccessBubble, afterDelay: 1.0)
             }
-        }
-        // 格式不对直接提示，不转入登陆界面
-        else {
-            errorLabel.text = "邮箱格式错误"
-            errorLabel.isHidden = false
         }
     }
     // 气泡延时消失

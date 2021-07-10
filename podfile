@@ -1,4 +1,7 @@
 target 'test'
+platform :ios, '14.5'
+use_frameworks!
 pod 'Alamofire', '~>5.4.3'
 pod 'SwiftLint'
 pod 'SnapKit'
+pod 'CryptoSwift'

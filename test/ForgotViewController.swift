@@ -185,41 +185,41 @@ class ForgotViewController: UIViewController, UITextFieldDelegate {
         return true
     }
     @objc func getCode() {
-        requestAndResponse(email: textName.text,
-                           function: .verify_code, method: .get) { [weak self] serverDescription in
-            if serverDescription.success! {
-                self?.errorLabel.text = "验证码已发送"
-                self?.errorLabel.isHidden = false
-                // 按钮灰，倒计时，计时完变色，可重发验证码
-                self?.isCounting = true
-            } else {
-                // 气泡提示？
-                if serverDescription.error?.code == "user_invalid_email_format"{
-                    self?.errorLabel.text = "邮箱格式错误"
-                } else if serverDescription.error?.code == "user_invalid_user"{
-                    self?.errorLabel.text = "该用户不存在"
-                }
-                self?.errorLabel.isHidden = false
-            }
-        }
+//        requestAndResponse(email: textName.text,
+//                           function: .verify_code, method: .get) { [weak self] serverDescription in
+//            if serverDescription.success! {
+//                self?.errorLabel.text = "验证码已发送"
+//                self?.errorLabel.isHidden = false
+//                // 按钮灰，倒计时，计时完变色，可重发验证码
+//                self?.isCounting = true
+//            } else {
+//                // 气泡提示？
+//                if serverDescription.error?.code == "user_invalid_email_format"{
+//                    self?.errorLabel.text = "邮箱格式错误"
+//                } else if serverDescription.error?.code == "user_invalid_user"{
+//                    self?.errorLabel.text = "该用户不存在"
+//                }
+//                self?.errorLabel.isHidden = false
+//            }
+//        }
     }
     @objc func loginPage() {
-        requestAndResponse(email: textName.text, pwd: textNewPassWord.text, code: textVerify.text,
-                           function: .reset, method: .post) { [self] serverDescription in
-            if serverDescription.success! {
-                // 通过调用闭包把栈上.text局部变量放到堆上
-                myClosure?(textName.text!)
-                self.navigationController?.popToRootViewController(animated: false)
-            } else {
-                if serverDescription.error?.code == "verify_code_invalid_verify_code"{
-                    errorLabel.text = "无效验证码"
-                    errorLabel.isHidden = false
-                } else if serverDescription.error?.code == "user_invalid_password_length"{
-                    errorLabel.text = "密码长度错误"
-                    errorLabel.isHidden = false
-                }
-            }
-        }
+//        requestAndResponse(email: textName.text, pwd: textNewPassWord.text, code: textVerify.text,
+//                           function: .reset, method: .post) { [self] serverDescription in
+//            if serverDescription.success! {
+//                // 通过调用闭包把栈上.text局部变量放到堆上
+//                myClosure?(textName.text!)
+//                self.navigationController?.popToRootViewController(animated: false)
+//            } else {
+//                if serverDescription.error?.code == "verify_code_invalid_verify_code"{
+//                    errorLabel.text = "无效验证码"
+//                    errorLabel.isHidden = false
+//                } else if serverDescription.error?.code == "user_invalid_password_length"{
+//                    errorLabel.text = "密码长度错误"
+//                    errorLabel.isHidden = false
+//                }
+//            }
+//        }
     }
     @objc func textValueChanged() {
         if textName.text?.isEmpty == false && textVerify.text?.isEmpty == false

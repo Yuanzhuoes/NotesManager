@@ -13,14 +13,111 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
     let bigEditButton = UIButton(type: .system)
     let searchBackground = UIView()
     let textSearch = UITextField()
-    let tableView = UITableView()
+    let tableView = TestTableView()
     let editImageView = UIImageView()
-    let editLable = UILabel()
+    let editLabel = UILabel()
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
+        myUI()
+        myConstraints()
+    }
+    // 内容还未显示时更新布局可能会有bug,
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+    }
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        tableView.layoutIfNeeded() // 更新布局 先tabel后collection
+        tableView.reloadData() // 重载数据 tabel根据collection再更新高度
+//≈        tableView.layoutIfNeeded() // 更新布局 先tabel后collection
+//        tableView.reloadData() // 重载数据 tabel根据collection再更新高度
+        print("ok")
+    }
+    // 单元格行数 系统默认为1
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        // 如果没有数据 显示创建按钮
+        guard let count = notes?.count else {
+            print("database error rows")
+            return 0
+        }
+        if count == 0 {
+            bigEditButton.isHidden = false
+        } else {
+            bigEditButton.isHidden = true
+        }
+        return count
+    }
+    // cell高度 这个函数是先执行的 所以先获取cell高度
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        // 自动计算cell的高度 可能会卡顿 可优化 缓存高度
+        print("tableView autoheight")
+        return UITableView.automaticDimension
+    }
+    // 初始化和复用单元格
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        // 一定要向下转换为子类
+        let cell = tableView.dequeueReusableCell(withIdentifier:
+                                                    MyTableViewCell.description(),
+                                                for: indexPath) as? MyTableViewCell
+//        // 下面两句一定要添加 否则cell的位置和内容位置显示不正确
+        cell?.frame = tableView.bounds
+        // Use this method to force the view to update its layout immediately.
+        cell?.layoutIfNeeded()
+        cell?.collectionView.reloadData()
+        // 单元格的内容显示
+        // 先从数据库载入标签 内容和状态 标签数据在自定义tabelview的collection进行可视化
+        cell?.noteLabelArray = stringToArray(notes?[indexPath.row].tag)
+        cell?.privateLable.text = (notes?[indexPath.row].status == 1) ? "公" : "私"
+        cell?.textLable.attributedText = notes?[indexPath.row].content
+            .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
+        // cell 选中样式
+        cell?.selectionStyle = .none
+        return cell!
+    }
+    // 左滑删除按钮
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt
+                    indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .normal, title: "删除") { (_, _, completionHandler) in
+            // 气泡 有空封装
+            let bubble = MyAlertController(title: "", message: "确定要删除该笔记吗？", preferredStyle: .alert)
+            // 气泡的两个按钮
+            let cancel = UIAlertAction(title: "取消", style: .default, handler: nil)
+            let yes = UIAlertAction(title: "确定", style: .default) { _ in
+                // 请求服务器 先获取笔记id和用户jwt
+                guard let id = notes?[indexPath.row].id else {
+                    print("Error: id is nil")
+                    return
+                }
+                let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+                let userInfo = UserInfo(authorization: jwt, nid: id)
+                requestAndResponse(userInfo: userInfo, function: .delete, method: .delete) { _ in
+                    do {
+                        // 删除数据库 缓存 UI
+                        try DBManager.db?.deleteNote(nid: id)
+                        notes?.remove(at: indexPath.row)
+                        tableView.deleteRows(at: [indexPath], with: .automatic)
+                    } catch {
+                        print(DBManager.db?.errorMessage as Any)
+                    }
+                }
+            }
+            bubble.addAction(yes)
+            bubble.addAction(cancel)
+            self.present(bubble, animated: true, completion: nil)
+            // 需要返回true，否则没有反应
+            completionHandler(true)
+        }
+        deleteAction.backgroundColor = MyColor.deleteColor
+        let config = UISwipeActionsConfiguration(actions: [deleteAction])
+        // 取消拉太长后自动删除
+        config.performsFirstActionWithFullSwipe = false
+        return config
+    }
+    func myUI () {
         self.view.backgroundColor = UIColor.white
         // 导航栏设置
+        self.title = ""
         // 不透明，view.top下移
         self.navigationController?.navigationBar.isTranslucent = false
         self.navigationController?.navigationBar.barTintColor = MyColor.navigationColor
@@ -36,10 +133,9 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: editButton)
         // 编辑按钮
         editImageView.image = UIImage(named: "Edit")?.withTintColor(MyColor.grayColor, renderingMode: .automatic)
-        editLable.text = "去创建你的第一个笔记吧 >"
-        editLable.font = UIFont.systemFont(ofSize: 12)
-        editLable.textColor = MyColor.grayColor
-        bigEditButton.isHidden = true
+        editLabel.text = "去创建你的第一个笔记吧 >"
+        editLabel.font = UIFont.systemFont(ofSize: 12)
+        editLabel.textColor = MyColor.grayColor
         // 编辑按钮的响应
         bigEditButton.addTarget(self, action: #selector(createNotes), for: .touchUpInside)
         // 搜索框的背景
@@ -53,93 +149,31 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         tableView.tableFooterView = UIView()
         tableView.dataSource = self
         tableView.delegate = self
-        self.view.addSubview(tableView)
+        tableView.register(MyTableViewCell.self, forCellReuseIdentifier: MyTableViewCell.description())
+        // 添加顺序影响显示效果？
         self.view.addSubview(searchBackground)
         self.view.addSubview(textSearch)
+        self.view.addSubview(tableView)
         self.view.addSubview(bigEditButton)
         bigEditButton.addSubview(editImageView)
-        bigEditButton.addSubview(editLable)
-        myConstraints()
-    }
-    // 单元格行数 默认为1
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // 如果没有数据 显示创建按钮
-        if dataSuorceArrary.count == 0 {
-            bigEditButton.isHidden = false
-        } else {
-            bigEditButton.isHidden = true
-        }
-        return dataSuorceArrary.count
-    }
-    // cell高度 这个函数是先执行的 所以要先获取cell高度
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        // 返回label的高度
-        return UITableView.automaticDimension
-    }
-    // 初始化和复用单元格
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let identifier = "CellID"
-        // 一定要转换
-        var cell: MyTableViewCell? = tableView.dequeueReusableCell(withIdentifier: identifier) as? MyTableViewCell
-        if cell == nil {
-            // 创建cell
-            cell = MyTableViewCell(style: .default, reuseIdentifier: identifier)
-        }
-        // 单元格的内容显示
-        // 标签
-        cell?.privateLable.text = "私"
-        cell?.noteLable.text = "哈哈哈"
-        // 文本
-        cell?.textLable.attributedText = dataSuorceArrary[indexPath.row]
-            .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
-        // cell 选中样式
-        cell?.selectionStyle = .none
-        return cell!
-    }
-    // 左滑删除按钮
-    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt
-                    indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let deleteAction = UIContextualAction(style: .normal, title: "删除") { (_, _, completionHandler) in
-            // 气泡 有空封装
-            let bubble = MyAlertController(title: "", message: "确定要删除该笔记吗？", preferredStyle: .alert)
-            // 气泡的两个按钮
-            let cancel = UIAlertAction(title: "取消", style: .default, handler: nil)
-            let yes = UIAlertAction(title: "确定", style: .default) { _ in
-                // 请求服务器
-                // success 删除本地笔记
-                // failure 气泡提示删除失败
-                dataSuorceArrary.remove(at: indexPath.row)
-                tableView.deleteRows(at: [indexPath], with: .automatic)
-            }
-            bubble.addAction(yes)
-            bubble.addAction(cancel)
-            self.present(bubble, animated: true, completion: nil)
-            // 需要返回true，否则没有反应
-            completionHandler(true)
-        }
-        deleteAction.backgroundColor = MyColor.deleteColor
-        let config = UISwipeActionsConfiguration(actions: [deleteAction])
-        // 取消拉太长后自动删除
-        config.performsFirstActionWithFullSwipe = false
-        return config
+        bigEditButton.addSubview(editLabel)
     }
     func myConstraints() {
-        // 约束
-        editButton.snp.makeConstraints { (make) in
+        editButton.snp.makeConstraints { make in
             make.width.height.equalTo(16)
         }
-        bigEditButton.snp.makeConstraints { (make) in
+        bigEditButton.snp.makeConstraints { make in
             make.width.equalTo(195)
             make.height.equalTo(88)
-            make.centerX.equalTo(self.view)
+            make.centerX.equalToSuperview()
             make.top.equalTo(searchBackground.snp.bottom).offset(88)
         }
-        editImageView.snp.makeConstraints { (make) in
+        editImageView.snp.makeConstraints { make in
             make.width.height.equalTo(30)
             make.centerX.equalTo(bigEditButton)
             make.top.equalTo(bigEditButton.snp.top).offset(12)
         }
-        editLable.snp.makeConstraints { (make) in
+        editLabel.snp.makeConstraints { make in
             make.centerX.equalTo(bigEditButton)
             make.top.equalTo(editImageView.snp.bottom).offset(12)
         }
@@ -147,7 +181,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
             make.height.equalTo(56)
             make.width.top.equalTo(self.view)
         }
-        textSearch.snp.makeConstraints { (make) in
+        textSearch.snp.makeConstraints { make in
             make.centerX.centerY.equalTo(searchBackground)
             make.height.equalTo(36)
             make.width.equalTo(searchBackground).offset(-16)
@@ -162,26 +196,34 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         let yes = UIAlertAction(title: "确定", style: .default) { _ in
             // 请求服务器
             // 如果成功 返回登陆界面
-            self.loginPage()
+            self.loginOut()
         }
         let cancel = UIAlertAction(title: "取消", style: .default, handler: nil)
         bubble.addAction(yes)
         bubble.addAction(cancel)
         self.present(bubble, animated: true, completion: nil)
     }
-    @objc func loginPage() {
+    @objc func loginOut() {
+        // 获取jwt
+        let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+        let userInfo = UserInfo(authorization: jwt)
         // 请求服务器
-        self.navigationController?.popToRootViewController(animated: false)
-        let bubble = UIAlertController(title: "", message: "已登出", preferredStyle: .alert)
-        self.present(bubble, animated: true, completion: nil)
-        // 气泡显示延时消失
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
-            bubble.dismiss(animated: true, completion: nil)
-        })
+        requestAndResponse(userInfo: userInfo, function: .logout, method: .post) { _ in
+            // 删除本地token
+            userDefault.removeObject(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+            self.navigationController?.popToRootViewController(animated: false)
+            let bubble = UIAlertController(title: "", message: "已登出", preferredStyle: .alert)
+            self.present(bubble, animated: true, completion: nil)
+            // 气泡显示延时消失
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+                bubble.dismiss(animated: true, completion: nil)
+            })
+        }
     }
     @objc func createNotes() {
         // 转入创建笔记页面
-        print("ok")
+        let view = CreateNoteViewController()
+        self.navigationController?.pushViewController(view, animated: true)
     }
     /*
     // MARK: - Navigation
@@ -192,5 +234,10 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         // Pass the selected object to the new view controller.
     }
     */
+}
 
+class TestTableView: UITableView {
+    override func layoutSubviews() {
+        super.layoutSubviews()
+    }
 }

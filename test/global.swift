@@ -4,112 +4,51 @@
 //
 //  Created by 李远卓 on 2021/6/11.
 //
-
 import Foundation
 import UIKit
 import Alamofire
-
-// url
-enum URL {
-    static let connectionProtocol = "http://"
-    static let host = "47.96.170.11/"
-    static let api = "api/v1/user/"
-}
-// 解析JSON
-struct ServerDescription: Codable {
-    struct Data: Codable {
-        let token: String?
-    }
-    struct Error: Codable {
-        let code: String?
-        let info: String?
-        let message: String?
-    }
-    let data: Data?
-    let error: Error?
-    let success: Bool?
-}
-// 接口属性，枚举
-enum Function {
-    case login, register, verify_code, reset
-}
-// 请求服务器，可选+默认值，防止调用时形参强制解析
-func requestAndResponse(email: String? = nil, pwd: String? = nil, code: String? = nil,
-                        function: Function, method: HTTPMethod, completion: @escaping (_: ServerDescription) -> Void) {
-    let parameters: [String: String?]
-    let url: String
-    switch function {
-    case .login:
-        url = URL.connectionProtocol + URL.host + URL.api + "login"
-        parameters = ["email": email,
-                      "password": pwd]
-    case .register:
-        url = URL.connectionProtocol + URL.host + URL.api + "register"
-        parameters = ["email": email,
-                      "password": pwd]
-    case .verify_code:
-        url = URL.connectionProtocol + URL.host + URL.api + "password/reset/" + "verify_code"
-        parameters = ["email": email]
-    case .reset:
-        url = URL.connectionProtocol + URL.host + URL.api + "password/" + "reset"
-        parameters = ["email": email,
-                      "new_password": pwd,
-                      "verify_code": code]
-    }
-    AF.request(url, method: method, parameters: parameters).responseJSON { response in
-        // 大括号是closure，匿名函数，response是参数，捕获上下文
-        switch response.result {
-        case .success(let json):
-                guard let data = response.data else { return }
-                // 解析JSON和捕获异常
-                do {
-                    let serverDescription = try JSONDecoder().decode(ServerDescription.self, from: data)
-                    completion(serverDescription)
-                    print(json)
-                } catch let jsonErr {
-                        print("json 解析出错 : ", jsonErr)
-                }
-        case .failure(let error):
-                print(error)
-        }
+import CryptoSwift
+// userDefault
+// 全局常量保存key（一致性，但不方便使用, 没有自动提示) let jwt = "jwt"
+// 结构体保存 (一致性，方便使用，但初始化麻烦，每次使用都要初始化 myStruct())
+// 结构体和静态常量属性结合 （一致性，不用初始化，但需手动设置key）
+// 结构体和枚举结合，遵循string协议, 用默认的rawValue作为key，可分组
+// 待优化，key值路径太长，无上下文推断
+struct UserDefaultKeys {
+    enum AccountInfo: String {
+        case userName, userPassword, jwt
     }
 }
+// 保存时间与校验和
+// struct UserDefaultNote {
+//    let localUpdatedaAt: String
+//    let checkSum: String
+// }
+let userDefault = UserDefaults.standard
 // 邮箱格式检测
 func validateEmail(email: String) -> Bool {
     let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
     let emailTest: NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
     return emailTest.evaluate(with: email)
 }
-// 自定义文本边框, 继承和重写方法，拓展是添加方法，不能重写方法
-class LineTextField: UITextField {
-    override func draw(_ rect: CGRect) {
-            // 线条的高度
-        let lineHeight: CGFloat = 0.5
-            // 线条的颜色
-        let lineColor = MyColor.eyeColor
-            guard let content = UIGraphicsGetCurrentContext() else { return }
-            content.setFillColor(lineColor.cgColor)
-            content.fill(CGRect.init(x: 0, y: self.frame.height - lineHeight,
-                                     width: self.frame.width, height: lineHeight))
-            UIGraphicsBeginImageContextWithOptions(rect.size, true, 0)
-        }
+// CRC32校验
+func getChecksum(_ title: String, _ content: String) -> String {
+    let string = title + content
+    return string.crc32()
 }
-// 自定义警告窗口 KVC运行时访问和修改对象属性
-class MyAlertController: UIAlertController {
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        let attributedString = NSAttributedString(string: self.message!, attributes: [
-            NSAttributedString.Key.font: UIFont.systemFont(ofSize: 15),
-            NSAttributedString.Key.foregroundColor: MyColor.textColor])
-        self.setValue(attributedString, forKey: "attributedMessage")
-    }
-    override func addAction(_ action: UIAlertAction ) {
-        super.addAction(action)
-        // 通过tintColor实现按钮颜色的修改。
-        self.view.tintColor = MyColor.greenColor
-//        也可以通过设置 action.setValue 来实现
-//        action.setValue(UIColor.orange, forKey: "titleTextColor")
-    }
+// 获取时间戳 IS0 8601
+func getDateIS08601() -> String {
+    let now = NSDate()
+    let formatter = DateFormatter()
+    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
+    formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
+    return formatter.string(from: now as Date)
+}
+// 字符串分割
+func stringToArray(_ text: String? = nil) -> [String] {
+    let dividedFlag: CharacterSet = NSCharacterSet(charactersIn: "/") as CharacterSet
+    guard let stringArray = text?.components(separatedBy: dividedFlag) else { return [] }
+    return stringArray
 }
 // 十六进制颜色转换 枚举作为命名空间 枚举不能是存储属性 所以必须加static
 enum MyColor {
@@ -124,8 +63,8 @@ enum MyColor {
     static let whiteColor = UIColor(hexColor: "#FFFFFF")
     static let deleteColor = UIColor(hexColor: "#DC663E")
     static let navigationColor = UIColor(hexColor: "#ECEDEE")
+    static let segmentColor = UIColor(hexColor: "#f4f5f9")
 }
-
 extension UIColor {
     // 便利构造函数可返回nil
     convenience init(hexColor: String) {
@@ -161,5 +100,3 @@ extension String {
         return attrStr
     }
 }
-// 模拟数据
-var dataSuorceArrary = ["哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈哈hahahahah", "你好", "a", "b", "c", "d"]
