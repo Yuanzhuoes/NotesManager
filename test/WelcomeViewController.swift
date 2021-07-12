@@ -32,7 +32,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
     // 会卡顿但没bug
     override func viewDidAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        tableView.reloadData()
+//        tableView.reloadData()
         tableView.layoutIfNeeded()
         tableView.reloadData()
     }
@@ -177,7 +177,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         }
         searchBackground.snp.makeConstraints { (make) in
             make.height.equalTo(56)
-            make.width.top.equalTo(self.view)
+            make.width.top.leading.equalTo(self.view)
         }
         textSearch.snp.makeConstraints { make in
             make.centerX.centerY.equalTo(searchBackground)
@@ -185,7 +185,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
             make.width.equalTo(searchBackground).offset(-16)
         }
         tableView.snp.makeConstraints { make in
-            make.width.height.equalTo(self.view)
+            make.leading.width.height.equalToSuperview()
             make.top.equalTo(searchBackground.snp.bottom)
         }
     }

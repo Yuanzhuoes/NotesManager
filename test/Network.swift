@@ -89,7 +89,7 @@ struct UserInfo {
     var nid: String?
     var note: Note?
 }
-// 请求服务器，可选+默认值，防止调用时形参强制解析
+// 请求服务器
 func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                         method: HTTPMethod, completion: @escaping (_: ServerDescription) -> Void) {
     var parameters: [String: Any?]?

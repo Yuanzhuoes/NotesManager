@@ -216,40 +216,40 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
         textLable.textColor = MyColor.textColor
         // 最大行，set to zero will grow with the label contents
         textLable.numberOfLines = 2
-        self.addSubview(self.collectionView)
-        self.addSubview(self.privateLable)
-        self.addSubview(self.textLable)
+        self.contentView.addSubview(self.collectionView)
+        self.contentView.addSubview(self.privateLable)
+        self.contentView.addSubview(self.textLable)
         self.collectionView.delegate = self
         collectionView.dataSource = self
         tagLayOut.delegate = self
     }
 
     func myConstraints() {
-        privateLable.snp.makeConstraints { (make) in
+        privateLable.snp.makeConstraints { (make) in // label
             make.width.height.equalTo(18)
-            make.top.equalTo(self.snp.top).offset(12)
-            make.right.equalTo(self.snp.right).offset(-16)
+            make.top.equalToSuperview().offset(12)
+            make.right.equalToSuperview().offset(-16)
         }
         collectionView.snp.makeConstraints { make in
-            make.left.equalTo(self.snp.left).offset(16)
-            make.right.equalTo(self.snp.right).offset(-16)
-            make.top.equalTo(self.snp.top).offset(12)
+            make.left.equalToSuperview().offset(16)
+            make.right.equalToSuperview().offset(-16)
+            make.top.equalToSuperview().offset(12)
             make.height.equalTo(1).priority(.low) // 不设置优先级会冲突
         }
         textLable.snp.makeConstraints { (make) in
-            make.left.equalTo(self.snp.left).offset(16)
-            make.right.equalTo(self.snp.right).offset(-16)
+            make.left.equalToSuperview().offset(16)
+            make.right.equalToSuperview().offset(-16)
             make.top.equalTo(collectionView.snp.bottom)
-            make.bottom.equalTo(self.snp.bottom).offset(-12)
+            make.bottom.equalToSuperview().offset(-12)
         }
     }
     // collectionview的最大高度 后于tabelview autolayout，所以tabelview高度不能准确更新
     func getCollectionViewHeight(height: CGFloat) {
         // 更新约束最好用remake重置所有布局，update不确定性太多
         collectionView.snp.remakeConstraints { make in
-            make.left.equalTo(self.snp.left).offset(16)
-            make.right.equalTo(self.snp.right).offset(-16)
-            make.top.equalTo(self.snp.top).offset(12)
+            make.left.equalToSuperview().offset(16)
+            make.right.equalToSuperview().offset(-16)
+            make.top.equalToSuperview().offset(12)
             make.height.equalTo(height + 8).priority(.low)
         }
     }
