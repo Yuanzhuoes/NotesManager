@@ -160,6 +160,7 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
                 }
                 // 获取最大高度和行数
                 if i == attributes.count - 1 {
+                    print(curAttr.frame.maxY)
                     self.delegate?.getCollectionViewHeight(height: curAttr.frame.maxY)
                 }
             }
@@ -170,8 +171,8 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
 // 自定义显示界面TableViewCell 嵌套 collectionview
 class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionViewDataSource,
                        UICollectionViewDelegateFlowLayout, DisplayTagFlowLayoutDelegate {
-    let privateLable = UILabel()
-    let textLable = UILabel()
+    let privateLabel = UILabel()
+    let contentLabel = UILabel()
     let tagLayOut = DisplayTagFlowLayout()
     lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: tagLayOut)
     var currRow: Int = 0
@@ -205,27 +206,27 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
         collectionView.register(MyCollectionViewCell.self, forCellWithReuseIdentifier: MyCollectionViewCell.description())
         collectionView.isScrollEnabled = false
         // 状态标签 固定大小 collection view
-        privateLable.font = UIFont.systemFont(ofSize: 11)
-        privateLable.textAlignment = .center
-        privateLable.textColor = UIColor.white
-        privateLable.backgroundColor = MyColor.greenColor
+        privateLabel.font = UIFont.systemFont(ofSize: 11)
+        privateLabel.textAlignment = .center
+        privateLabel.textColor = UIColor.white
+        privateLabel.backgroundColor = MyColor.greenColor
         // 内容标签
-        textLable.backgroundColor = UIColor.white
-        textLable.font = UIFont.systemFont(ofSize: 14)
-        textLable.textAlignment = .left
-        textLable.textColor = MyColor.textColor
+        contentLabel.backgroundColor = UIColor.white
+        contentLabel.font = UIFont.systemFont(ofSize: 14)
+        contentLabel.textAlignment = .left
+        contentLabel.textColor = MyColor.textColor
         // 最大行，set to zero will grow with the label contents
-        textLable.numberOfLines = 2
+        contentLabel.numberOfLines = 2
         self.contentView.addSubview(self.collectionView)
-        self.contentView.addSubview(self.privateLable)
-        self.contentView.addSubview(self.textLable)
+        self.contentView.addSubview(self.privateLabel)
+        self.contentView.addSubview(self.contentLabel)
         self.collectionView.delegate = self
         collectionView.dataSource = self
         tagLayOut.delegate = self
     }
 
     func myConstraints() {
-        privateLable.snp.makeConstraints { (make) in // label
+        privateLabel.snp.makeConstraints { (make) in // label
             make.width.height.equalTo(18)
             make.top.equalToSuperview().offset(12)
             make.right.equalToSuperview().offset(-16)
@@ -236,7 +237,7 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
             make.top.equalToSuperview().offset(12)
             make.height.equalTo(1).priority(.low) // 不设置优先级会冲突
         }
-        textLable.snp.makeConstraints { (make) in
+        contentLabel.snp.makeConstraints { (make) in
             make.left.equalToSuperview().offset(16)
             make.right.equalToSuperview().offset(-16)
             make.top.equalTo(collectionView.snp.bottom)
