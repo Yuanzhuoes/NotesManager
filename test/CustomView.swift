@@ -247,13 +247,11 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
     // collectionview的最大高度 后于tabelview autolayout，所以tabelview高度不能准确更新
     func getCollectionViewHeight(height: CGFloat) {
         // 更新约束最好用remake重置所有布局，update不确定性太多
-        collectionView.snp.remakeConstraints { make in
-            make.left.equalToSuperview().offset(16)
-            make.right.equalToSuperview().offset(-16)
-            make.top.equalToSuperview().offset(12)
-            make.height.equalTo(height + 8).priority(.low)
+        collectionView.snp.updateConstraints {
+            $0.height.equalTo(height + 8).priority(.low)
         }
     }
+
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // 消除空字符串的显示bug
         if noteLabelArray.count == 1 && noteLabelArray[0] == "" {

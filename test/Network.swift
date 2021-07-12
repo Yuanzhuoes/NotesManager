@@ -113,7 +113,6 @@ struct UserInfo {
     var note: Note?
 }
 
-// swiftlint:disable:next cyclomatic_complexity
 func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                         method: HTTPMethod, completion: @escaping (_: ServerDescription) -> Void) {
     var parameters: [String: Any?]?
@@ -161,20 +160,13 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                       "local_updated_at": userInfo?.note?.localUpdatedAt]
     }
 
-    var params = [String: Any]()
-    for (key, value) in parameters ?? [:] {
-        if let value = value {
-            params[key] = value
-        }
-    }
-
     // TODO: optional URL
     let urlString = url?.absoluteString
     var request: DataRequest?
     request =
         AF.request(urlString!,
                    method: method,
-                   parameters: params,
+                   parameters: parameters,
                    encoding: JSONEncoding.default,
                    headers: headers).responseJSON { response in
                     DispatchQueue.global().async {

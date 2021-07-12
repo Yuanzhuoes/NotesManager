@@ -24,22 +24,22 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
 
         loadData { [weak self] in
             self?.tableView.reloadData()
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
         }
     }
+
     // 内容还未显示时强制更新布局可能会有bug 但不会卡顿
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        tableView.reloadData()
-//        tableView.layoutIfNeeded()
-//        tableView.reloadData()
     }
+
     // 会卡顿但没bug
     override func viewDidAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        tableView.reloadData()
-        tableView.layoutIfNeeded()
-        tableView.reloadData()
     }
+
     // 单元格行数 系统默认为1
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 如果没有数据 显示创建按钮
@@ -54,9 +54,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         }
         return count
     }
-//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-//        return UITableView.automaticDimension
-//    }
+
     // 初始化和复用单元格
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 一定要向下转换为子类
@@ -148,10 +146,11 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         // 左右边距
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         // 去除多余下划线
+        tableView.register(MyTableViewCell.self, forCellReuseIdentifier: MyTableViewCell.description())
         tableView.tableFooterView = UIView()
         tableView.dataSource = self
         tableView.delegate = self
-        tableView.register(MyTableViewCell.self, forCellReuseIdentifier: MyTableViewCell.description())
+
         // 添加顺序影响显示效果?
         self.view.addSubview(searchBackground)
         self.view.addSubview(textSearch)
@@ -160,6 +159,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         bigEditButton.addSubview(editImageView)
         bigEditButton.addSubview(editLabel)
     }
+
     func myConstraints() {
         editButton.snp.makeConstraints { make in
             make.width.height.equalTo(16)
@@ -193,6 +193,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
             make.top.equalTo(searchBackground.snp.bottom)
         }
     }
+
     @objc func showBubble() {
         let bubble = MyAlertController(title: "", message: "确定要退出登陆吗？", preferredStyle: .alert)
         let yes = UIAlertAction(title: "确定", style: .default) { _ in
@@ -205,6 +206,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         bubble.addAction(cancel)
         self.present(bubble, animated: true, completion: nil)
     }
+
     @objc func loginOut() {
         // 获取jwt
         let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
@@ -224,18 +226,15 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
     }
     @objc func createNotes() {
         // 转入创建笔记页面
-        let view = CreateNoteViewController()
-        self.navigationController?.pushViewController(view, animated: true)
+        let viewController = CreateNoteViewController()
+        viewController.onSave = { [weak self] in
+            self?.tableView.reloadData()
+            DispatchQueue.main.async {
+                self?.tableView.reloadData()
+            }
+        }
+        self.navigationController?.pushViewController(viewController, animated: true)
     }
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
 }
 
 // MARK: -

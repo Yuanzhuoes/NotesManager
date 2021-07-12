@@ -8,13 +8,68 @@
 import UIKit
 import CryptoSwift
 
+class TextViewWithPlacehodler: UITextView {
+    let label = UILabel()
+
+    func configure() {
+        addSubview(label)
+        updateConstraints()
+        label.textColor = MyColor.grayColor
+        label.font = .systemFont(ofSize: 15)
+        label.text = "请输入标签，示例：标签/标签"
+    }
+
+    override init(frame: CGRect, textContainer: NSTextContainer?) {
+        super.init(frame: frame, textContainer: textContainer)
+        configure()
+    }
+
+    required init?(coder: NSCoder) {
+        super.init(coder: coder)
+        configure()
+    }
+
+    override var text: String! {
+        didSet {
+            if text == nil || text.isEmpty {
+                label.text = "请输入标签，示例：标签/标签"
+            } else {
+                label.text = ""
+            }
+        }
+    }
+
+    override var attributedText: NSAttributedString! {
+        didSet {
+            if attributedText == nil || attributedText.string.isEmpty {
+                label.text = "请输入标签，示例：标签/标签"
+            } else {
+                label.text = ""
+            }
+        }
+    }
+
+    override var textContainerInset: UIEdgeInsets {
+        didSet {
+            updateConstraints()
+        }
+    }
+
+    private func udpateLabelConstraints() {
+        label.snp.remakeConstraints { make in
+            make.top.equalToSuperview().offset(textContainerInset.top)
+            make.left.equalToSuperview().offset(textContainer.lineFragmentPadding)
+        }
+    }
+}
+
 class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
                                 UITextViewDelegate, UICollectionViewDelegate,
                                 UICollectionViewDataSource,
                                 UICollectionViewDelegateFlowLayout, TagFlowLayoutDelegate {
     let contentView = UIView()
     let scrollView = UIScrollView()
-    let textLabelView = UITextView()
+    let textLabelView = TextViewWithPlacehodler()
     let textContenView = UITextView()
     let tagLayOut = TagFlowLayout()
     // lazt load
@@ -28,21 +83,15 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
     let textContentPlaceHolder = UILabel()
     let screenFrame = UIScreen.main.bounds
     var dataArrary: [String] = []
+
+    var onSave: (() -> Void)?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         myUI()
         myConstrain()
-        // Do any additional setup after loading the view.
     }
-    /*
-    // MARK: - Navigation
 
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
-    }
-    */
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // 消除空字符串的显示bug
         if dataArrary.count == 1 && dataArrary[0] == "" {
@@ -50,6 +99,7 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
         }
         return dataArrary.count
     }
+
     // cell的内容
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView
@@ -59,17 +109,20 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
         }
         return cell
     }
+
     // 每个item的大小, 坐标是系统计算，item之间的间距由自定义layout调整，长度由函数实现
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: labelWidth((dataArrary[indexPath.item]), 15),
                       height: 15)
     }
+
     // 行间距
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 8
     }
+
     // 根据内容和高度计算每一个label的宽度
     func labelWidth(_ text: String, _ height: CGFloat) -> CGFloat {
         let size = CGSize(width: 2000, height: height)
@@ -84,6 +137,7 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
         }
         return labelSize.width + 8
     }
+
     // collectionview的最大高度
     func getCollectionViewHeightAndRows(height: CGFloat, row: Int) {
         // 超过两行再更新高度，因为默认高度可显示两行
@@ -93,6 +147,7 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
             }
         }
     }
+
     // placeholder+字符串分割+更新数据
     func textViewDidChange(_ textView: UITextView) {
         // placeholder 的显示
@@ -115,6 +170,7 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
                 textContentPlaceHolder.text = ""
             }
         }
+
         // 激活保存按钮
         if textContentPlaceHolder.text == "" && textLabelPlaceHolder.text == "" {
             saveButton.isEnabled = true
@@ -123,8 +179,10 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
             saveButton.isEnabled = false
             saveButton.tintColor = MyColor.grayColor
         }
+
         // 限制输入大小？
     }
+
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView == textContenView {
             // 滑动到指定位置
@@ -132,6 +190,7 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
             // scrollRectToVisible() 是滑动到一个当前不可见的rect, 如果rect当前可见则无动作
         }
     }
+
     func myUI() {
         self.view.backgroundColor = UIColor.white
         // 导航栏设置
@@ -196,7 +255,7 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
         contentView.addSubview(textContenView)
         contentView.addSubview(labelLine)
         contentView.addSubview(contentLine)
-        contentView.addSubview(textLabelPlaceHolder)
+        // contentView.addSubview(textLabelPlaceHolder)
         contentView.addSubview(textContentPlaceHolder)
         scrollView.delegate = self
         textLabelView.delegate = self
@@ -247,10 +306,10 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
             make.left.right.equalTo(collectionView)
             make.bottom.equalTo(0)
         }
-        textLabelPlaceHolder.snp.makeConstraints { make in
-            make.top.equalTo(textLabelView).offset(10)
-            make.left.equalTo(textLabelView)
-        }
+//        textLabelPlaceHolder.snp.makeConstraints { make in
+//            make.top.equalTo(textLabelView).offset(textLabelView.textContainerInset.top)
+//            make.left.equalTo(textLabelView).offset(textLabelView.textContainer.lineFragmentPadding)
+//        }
         textContentPlaceHolder.snp.makeConstraints { make in
             make.top.equalTo(textContenView).offset(10)
             make.left.equalTo(textContenView)
@@ -290,9 +349,12 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
                 DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
                     bubble.dismiss(animated: true, completion: nil)
                 })
+
+                self.onSave?()
             }
         }
     }
+
     func prepareNote(title: String, content: String, status: Int) -> UserInfo {
         let localUpdatedAt = getDateIS08601()
         let checksum = getChecksum(title, content)
