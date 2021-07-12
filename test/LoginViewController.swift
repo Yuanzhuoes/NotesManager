@@ -27,23 +27,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         } catch {
             print(DBManager.db?.errorMessage as Any)
         }
-        // 请求网络获取所有笔记
-        let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
-        let userInfo = UserInfo(authorization: jwt)
-        requestAndResponse(userInfo: userInfo, function: .getAllNotes, method: .get) { serverDescription in
-            guard let response = serverDescription.items else {
-                print("error download notes")
-                return
-            }
-            // 写入数据库
-            insertAllNotesToDB(notes: response)
-            // 读取所有笔记到缓存
-            do {
-                notes = try DBManager.db?.queryAllSQLNotes()
-            } catch {
-                print(DBManager.db?.errorMessage as Any)
-            }
-        }
+
         // 导航控制器设置
         self.view.backgroundColor = UIColor.white
         // 当前页和返回页字符不显示

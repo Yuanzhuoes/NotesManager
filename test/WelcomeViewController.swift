@@ -21,6 +21,10 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         // Do any additional setup after loading the view.
         myUI()
         myConstraints()
+
+        loadData { [weak self] in
+            self?.tableView.reloadData()
+        }
     }
     // 内容还未显示时强制更新布局可能会有bug 但不会卡顿
     override func viewWillAppear(_ animated: Bool) {
@@ -66,8 +70,8 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
 //         单元格的内容显示
 //         先从数据库载入标签 内容和状态 标签数据在自定义tabelview的collection进行可视化
         cell?.noteLabelArray = stringToArray(notes?[indexPath.row].tag)
-        cell?.privateLable.text = (notes?[indexPath.row].status == 1) ? "公" : "私"
-        cell?.textLable.attributedText = notes?[indexPath.row].content
+        cell?.privateLabel.text = (notes?[indexPath.row].status == 1) ? "公" : "私"
+        cell?.contentLabel.attributedText = notes?[indexPath.row].content
             .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
         // cell 选中样式
         cell?.selectionStyle = .none
@@ -232,4 +236,32 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         // Pass the selected object to the new view controller.
     }
     */
+}
+
+// MARK: -
+
+extension WelcomeViewController {
+    func loadData(_ closure: (() -> Void)?) {
+        // 请求网络获取所有笔记
+        let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+        let userInfo = UserInfo(authorization: jwt)
+        requestAndResponse(userInfo: userInfo, function: .getAllNotes, method: .get) { serverDescription in
+            guard let response = serverDescription.items else {
+                print("error download notes")
+                return
+            }
+            // 写入数据库
+            insertAllNotesToDB(notes: response)
+            // 读取所有笔记到缓存
+            do {
+                notes = try DBManager.db?.queryAllSQLNotes()
+            } catch {
+                print(DBManager.db?.errorMessage as Any)
+            }
+
+            DispatchQueue.main.async {
+                closure?()
+            }
+        }
+    }
 }
