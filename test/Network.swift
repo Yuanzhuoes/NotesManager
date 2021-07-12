@@ -19,7 +19,7 @@ extension URL {
         case www = "www.maimemo.com"
     }
 
-    enum Path: String {
+    enum Path: String, CaseIterable {
         case login      = "/api/auth/login"
         case logout     = "/api/auth/logout"
         case notes      = "/api/notes"          // 全量
@@ -32,6 +32,7 @@ extension URL {
         comps.scheme = scheme.rawValue
         comps.host = host.rawValue
         comps.path = path.rawValue
+        // assert(comps.url != nil)
         return comps.url
     }
 
