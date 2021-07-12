@@ -36,7 +36,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 return
             }
             // 写入数据库
-            insertAllNotesToDB(notes: response) // update
+            insertAllNotesToDB(notes: response)
             // 读取所有笔记到缓存
             do {
                 notes = try DBManager.db?.queryAllSQLNotes()

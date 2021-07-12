@@ -129,11 +129,17 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
         guard let attributes = super.layoutAttributesForElements(in: rect) else {
             return nil
         }
-        // 水平间距调整
+        // 水平间距调整 如果有标签就重新布局 否则默认值
         if attributes.count > 0 {
             var row = 1
             // 第一个标签居左
             attributes[0].frame.origin.x = 0
+            // 只有一个标签 只记录高度 不调整间距
+            if attributes.count == 1 {
+                self.delegate?.getCollectionViewHeight(height: attributes[0].frame.maxY)
+                return attributes
+            }
+            // 两个标签开始调整间距
             for i in 1..<attributes.count {
                 let curAttr = attributes[i]
                 let preAttr = attributes[i - 1]
@@ -143,7 +149,7 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
                 // 如果一行内还放得下 调整x, 否则换行（系统自动的）居左 (当前item宽度 + 前一个item的最大x坐标 + 间距 <= collectionview的宽度)
                 if targetX + curAttr.frame.width <= collectionViewContentSize.width - 18 && row == 1 {
                     curAttr.frame.origin.x = targetX
-                    // 为什么不限制y会出错
+                    // 不限制y会出错 why?
                     curAttr.frame.origin.y = targetY
                 } else if targetX + curAttr.frame.width <= collectionViewContentSize.width && row > 1 {
                     curAttr.frame.origin.x = targetX
@@ -161,7 +167,7 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
         return attributes
     }
 }
-// 自定义TableViewCell 嵌套 collectionview
+// 自定义显示界面TableViewCell 嵌套 collectionview
 class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionViewDataSource,
                        UICollectionViewDelegateFlowLayout, DisplayTagFlowLayoutDelegate {
     let privateLable = UILabel()
@@ -178,6 +184,21 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    // 根据cell的约束返回最优size
+//    override func systemLayoutSizeFitting(_ targetSize: CGSize,
+//                                          withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
+//                                          verticalFittingPriority: UILayoutPriority) -> CGSize {
+//        let size = super.systemLayoutSizeFitting(targetSize,
+//                                                 withHorizontalFittingPriority: horizontalFittingPriority,
+//                                                 verticalFittingPriority: verticalFittingPriority)
+//        self.collectionView.layoutIfNeeded()
+//        let collectionViewHeight = self.collectionView.collectionViewLayout.collectionViewContentSize.height
+//        print("CONTENT:\(collectionViewHeight)")
+//        let privateLableHeight = self.privateLable.frame.height
+//        let textLabelHeight = self.textLable.frame.height
+//        let tabelViewCellHeight = collectionViewHeight + privateLableHeight + textLabelHeight
+//        return CGSize(width: size.width, height: tabelViewCellHeight + 20)
+//    }
     func myAdd() {
 //         collection view
         collectionView.backgroundColor = UIColor.white
@@ -213,7 +234,7 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
             make.left.equalTo(self.snp.left).offset(16)
             make.right.equalTo(self.snp.right).offset(-16)
             make.top.equalTo(self.snp.top).offset(12)
-            make.height.equalTo(18).priority(.low) // 不设置优先级会冲突
+            make.height.equalTo(1).priority(.low) // 不设置优先级会冲突
         }
         textLable.snp.makeConstraints { (make) in
             make.left.equalTo(self.snp.left).offset(16)
@@ -229,10 +250,8 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
             make.left.equalTo(self.snp.left).offset(16)
             make.right.equalTo(self.snp.right).offset(-16)
             make.top.equalTo(self.snp.top).offset(12)
-            make.height.equalTo(height + 10).priority(.low) // 不设置优先级会冲突
+            make.height.equalTo(height + 8).priority(.low)
         }
-        print("collectionView autoheight")
-        // 更新tabelviewHight
     }
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         // 消除空字符串的显示bug

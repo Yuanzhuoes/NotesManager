@@ -13,7 +13,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
     let bigEditButton = UIButton(type: .system)
     let searchBackground = UIView()
     let textSearch = UITextField()
-    let tableView = TestTableView()
+    let tableView = UITableView()
     let editImageView = UIImageView()
     let editLabel = UILabel()
     override func viewDidLoad() {
@@ -22,17 +22,19 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         myUI()
         myConstraints()
     }
-    // 内容还未显示时更新布局可能会有bug,
+    // 内容还未显示时强制更新布局可能会有bug 但不会卡顿
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
+//        tableView.reloadData()
+//        tableView.layoutIfNeeded()
+//        tableView.reloadData()
     }
+    // 会卡顿但没bug
     override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        tableView.layoutIfNeeded() // 更新布局 先tabel后collection
-        tableView.reloadData() // 重载数据 tabel根据collection再更新高度
-//≈        tableView.layoutIfNeeded() // 更新布局 先tabel后collection
-//        tableView.reloadData() // 重载数据 tabel根据collection再更新高度
-        print("ok")
+        super.viewWillAppear(animated)
+        tableView.reloadData()
+        tableView.layoutIfNeeded()
+        tableView.reloadData()
     }
     // 单元格行数 系统默认为1
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -48,25 +50,21 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         }
         return count
     }
-    // cell高度 这个函数是先执行的 所以先获取cell高度
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        // 自动计算cell的高度 可能会卡顿 可优化 缓存高度
-        print("tableView autoheight")
-        return UITableView.automaticDimension
-    }
+//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        return UITableView.automaticDimension
+//    }
     // 初始化和复用单元格
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // 一定要向下转换为子类
         let cell = tableView.dequeueReusableCell(withIdentifier:
                                                     MyTableViewCell.description(),
                                                 for: indexPath) as? MyTableViewCell
-//        // 下面两句一定要添加 否则cell的位置和内容位置显示不正确
-        cell?.frame = tableView.bounds
+//        cell?.frame = tableView.bounds
         // Use this method to force the view to update its layout immediately.
         cell?.layoutIfNeeded()
         cell?.collectionView.reloadData()
-        // 单元格的内容显示
-        // 先从数据库载入标签 内容和状态 标签数据在自定义tabelview的collection进行可视化
+//         单元格的内容显示
+//         先从数据库载入标签 内容和状态 标签数据在自定义tabelview的collection进行可视化
         cell?.noteLabelArray = stringToArray(notes?[indexPath.row].tag)
         cell?.privateLable.text = (notes?[indexPath.row].status == 1) ? "公" : "私"
         cell?.textLable.attributedText = notes?[indexPath.row].content
@@ -150,7 +148,7 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         tableView.dataSource = self
         tableView.delegate = self
         tableView.register(MyTableViewCell.self, forCellReuseIdentifier: MyTableViewCell.description())
-        // 添加顺序影响显示效果？
+        // 添加顺序影响显示效果?
         self.view.addSubview(searchBackground)
         self.view.addSubview(textSearch)
         self.view.addSubview(tableView)
@@ -234,10 +232,4 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         // Pass the selected object to the new view controller.
     }
     */
-}
-
-class TestTableView: UITableView {
-    override func layoutSubviews() {
-        super.layoutSubviews()
-    }
 }
