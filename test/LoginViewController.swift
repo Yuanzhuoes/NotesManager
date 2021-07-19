@@ -22,11 +22,12 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         // open and connect database
-        do {
-            try DBManager.db?.createTable(table: SQLNote.self)
-        } catch {
-            print(DBManager.db?.errorMessage as Any)
-        }
+//        do {
+//            try DBManager.db?.createTable(table: SQLNote.self)
+//        } catch {
+//            print(DBManager.db?.errorMessage as Any)
+//        }
+        try? DBManager.db?.createTable(table: SQLNote.self)
 
         // 导航控制器设置
         self.view.backgroundColor = UIColor.white
@@ -175,7 +176,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         self.navigationController?.pushViewController(viewController, animated: true)
     }
     @objc func welcomePage() {
-        let userInfo = UserInfo(email: textName.text, pwd: textPassWord.text)
+        let userInfo = UserInfo(email: textName.text!, pwd: textPassWord.text)
         requestAndResponse(userInfo: userInfo,
                            function: .login, method: .post) { [self] serverDescription in
             if serverDescription.message == "背单词服务出错：账号或密码错误。" {

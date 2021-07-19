@@ -72,7 +72,7 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
     let textLabelView = TextViewWithPlacehodler()
     let textContenView = UITextView()
     let tagLayOut = TagFlowLayout()
-    // lazt load
+    // lazy load memory property. collectionView 第一次被调用时才初始化, 因为taglayout先于初始化
     lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: tagLayOut)
     let saveButton = UIButton(type: .system)
     let statusLabel = UILabel()
@@ -153,7 +153,8 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
         // placeholder 的显示
         if textView == textLabelView {
             textLabelView.text = textView.text
-            dataArrary = stringToArray(textLabelView.text)
+//            dataArrary = stringToArray(textLabelView.text)
+            dataArrary = textLabelView.text.array
             // reload dataArrary to collectionView
             collectionView.reloadData()
             if textLabelView.text == nil || textLabelView.text == "" {
@@ -357,7 +358,7 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
 
     func prepareNote(title: String, content: String, status: Int) -> UserInfo {
         let localUpdatedAt = getDateIS08601()
-        let checksum = getChecksum(title, content)
+        let checksum = (title + content).crc32()
         let status = status == 1 ? true : false
         let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
         let myNote = UserInfo.Note(title: title, content: content,

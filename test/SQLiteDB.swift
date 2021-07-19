@@ -8,9 +8,6 @@ import Foundation
 import SQLite3
 // 缓存
 var notes: [SQLNote]?
-// databse url
-let url = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-let dbPath = (url as NSString).appendingPathComponent("myNote.db")
 // error
 enum SQLiteError: Error {
     case openDatabase(message: String)
@@ -46,6 +43,7 @@ extension SQLNote: SQLTable {
 class SQLiteDatabase {
     // swift type of c pointer
     private let dbPointer: OpaquePointer?
+    // computed property
     var errorMessage: String {
         if let errorPointer = sqlite3_errmsg(dbPointer) {
             let errorMessage = String(cString: errorPointer)
@@ -66,6 +64,7 @@ class SQLiteDatabase {
         if sqlite3_open(path, &db) == SQLITE_OK {
             return SQLiteDatabase(dbPointer: db)
         } else {
+            // always close database at last
             defer {
                 if db != nil {
                     sqlite3_close(db)
@@ -129,17 +128,19 @@ extension SQLiteDatabase {
         print("Successfully inserted row.")
     }
 }
-// insert all notes
-func insertAllNotesToDB(notes: [ServerDescription.Items]) {
-    for note in notes {
-        let id = note.id
-        let tag = note.title
-        let content = note.content
-        let status = note.isPublic == true ? 1 : 0
-        do {
-            try DBManager.db?.insertNote(myNote: SQLNote(id: id!, tag: tag!, content: content!, status: status))
-        } catch {
-            print(DBManager.db?.errorMessage as Any)
+extension SQLiteDatabase {
+    // insert all notes
+    func insertAllNotesToDB(notes: [ServerDescription.Items]) {
+        for note in notes {
+            let id = note.id
+            let tag = note.title
+            let content = note.content
+            let status = note.isPublic == true ? 1 : 0
+            do {
+                try DBManager.db?.insertNote(myNote: SQLNote(id: id!, tag: tag!, content: content!, status: status))
+            } catch {
+                print(DBManager.db?.errorMessage as Any)
+            }
         }
     }
 }
@@ -155,8 +156,7 @@ extension SQLiteDatabase {
         }
         let nid = nid as NSString
         guard sqlite3_bind_text(queryStatement, 1, nid.utf8String, -1, nil) == SQLITE_OK else {
-            print("Query result is nil.")
-            return nil
+            throw SQLiteError.bind(message: errorMessage)
         }
         guard sqlite3_step(queryStatement) == SQLITE_ROW else {
             throw SQLiteError.step(message: errorMessage)
@@ -261,12 +261,10 @@ extension SQLiteDatabase {
 }
 // count
 extension SQLiteDatabase {
-    func count () -> Int? {
+    func count () -> Int {
         let countSQL = "SELECT count(*) FROM SQLNote;"
         var count: Int = 0
-        guard let countStatement = try? prepareStatement(sql: countSQL) else {
-            return nil
-        }
+        let countStatement = try? prepareStatement(sql: countSQL)
         defer {
             sqlite3_finalize(countStatement)
         }

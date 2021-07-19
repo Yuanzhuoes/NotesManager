@@ -21,18 +21,16 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         // Do any additional setup after loading the view.
         myUI()
         myConstraints()
-
+    }
+    // 内容还未显示时强制更新布局可能会有bug 但不会卡顿
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         loadData { [weak self] in
             self?.tableView.reloadData()
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
             }
         }
-    }
-
-    // 内容还未显示时强制更新布局可能会有bug 但不会卡顿
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
     }
 
     // 会卡顿但没bug
@@ -44,7 +42,6 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 如果没有数据 显示创建按钮
         guard let count = notes?.count else {
-            print("database error rows")
             return 0
         }
         if count == 0 {
@@ -67,8 +64,13 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
         cell?.collectionView.reloadData()
 //         单元格的内容显示
 //         先从数据库载入标签 内容和状态 标签数据在自定义tabelview的collection进行可视化
-        cell?.noteLabelArray = stringToArray(notes?[indexPath.row].tag)
-        cell?.privateLabel.text = (notes?[indexPath.row].status == 1) ? "公" : "私"
+//        cell?.noteLabelArray = stringToArray(notes?[indexPath.row].tag)
+        if let notesLabelArray = notes?[indexPath.row].tag.array {
+            cell?.noteLabelArray = notesLabelArray
+        } else {
+            cell?.noteLabelArray = []
+        }
+        cell?.privateLabel.text = notes?[indexPath.row].status.string
         cell?.contentLabel.attributedText = notes?[indexPath.row].content
             .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
         // cell 选中样式
@@ -90,16 +92,19 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
                     return
                 }
                 let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
-                let userInfo = UserInfo(authorization: jwt, nid: id)
+                let userInfo = UserInfo(authorization: jwt!, nid: id)
                 requestAndResponse(userInfo: userInfo, function: .delete, method: .delete) { _ in
-                    do {
-                        // 删除数据库 缓存 UI
-                        try DBManager.db?.deleteNote(nid: id)
-                        notes?.remove(at: indexPath.row)
-                        tableView.deleteRows(at: [indexPath], with: .automatic)
-                    } catch {
-                        print(DBManager.db?.errorMessage as Any)
-                    }
+//                    do {
+//                        // 删除数据库 缓存 UI
+//                        try DBManager.db?.deleteNote(nid: id)
+//                        notes?.remove(at: indexPath.row)
+//                        tableView.deleteRows(at: [indexPath], with: .automatic)
+//                    } catch {
+//                        print(DBManager.db?.errorMessage as Any)
+//                    }
+                    try? DBManager.db?.deleteNote(nid: id)
+                    notes?.remove(at: indexPath.row)
+                    tableView.deleteRows(at: [indexPath], with: .automatic)
                 }
             }
             bubble.addAction(yes)
@@ -161,14 +166,14 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
     }
 
     func myConstraints() {
-        editButton.snp.makeConstraints { make in
-            make.width.height.equalTo(16)
+        editButton.snp.makeConstraints {
+            $0.width.height.equalTo(16)
         }
-        bigEditButton.snp.makeConstraints { make in
-            make.width.equalTo(195)
-            make.height.equalTo(88)
-            make.centerX.equalToSuperview()
-            make.top.equalTo(searchBackground.snp.bottom).offset(88)
+        bigEditButton.snp.makeConstraints {
+            $0.width.equalTo(195)
+            $0.height.equalTo(88)
+            $0.centerX.equalToSuperview()
+            $0.top.equalTo(searchBackground.snp.bottom).offset(88)
         }
         editImageView.snp.makeConstraints { make in
             make.width.height.equalTo(30)
@@ -250,7 +255,7 @@ extension WelcomeViewController {
                 return
             }
             // 写入数据库
-            insertAllNotesToDB(notes: response)
+            DBManager.db?.insertAllNotesToDB(notes: response)
             // 读取所有笔记到缓存
             do {
                 notes = try DBManager.db?.queryAllSQLNotes()

@@ -31,11 +31,6 @@ func validateEmail(email: String) -> Bool {
     let emailTest: NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
     return emailTest.evaluate(with: email)
 }
-// CRC32校验
-func getChecksum(_ title: String, _ content: String) -> String {
-    let string = title + content
-    return string.crc32()
-}
 // 获取时间戳 IS0 8601
 func getDateIS08601() -> String {
     let now = NSDate()
@@ -44,14 +39,9 @@ func getDateIS08601() -> String {
     formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
     return formatter.string(from: now as Date)
 }
-// 字符串分割
-func stringToArray(_ text: String? = nil) -> [String] {
-    let dividedFlag: CharacterSet = NSCharacterSet(charactersIn: "/") as CharacterSet
-    guard let stringArray = text?.components(separatedBy: dividedFlag) else { return [] }
-    return stringArray
-}
-// 十六进制颜色转换 枚举作为命名空间 枚举不能是存储属性 所以必须加static
-enum MyColor {
+
+// 十六进制颜色转换
+struct MyColor {
     static let placeHolderColor = UIColor(hexColor: "aaaaaa")
     static let eyeColor = UIColor(hexColor: "aaaaaa")
     static let greenColor = UIColor(hexColor: "#36B59D")
@@ -98,5 +88,15 @@ extension String {
             as [NSAttributedString.Key: Any]
         let attrStr = NSMutableAttributedString.init(string: self, attributes: attributes)
         return attrStr
+    }
+    // 字符串分割
+    var array: [String] {
+        let dividedFlag: CharacterSet = NSCharacterSet(charactersIn: "/") as CharacterSet
+        return self.components(separatedBy: dividedFlag)
+    }
+}
+extension Int {
+    var string: String {
+        return self == 1 ? "公" : "私"
     }
 }

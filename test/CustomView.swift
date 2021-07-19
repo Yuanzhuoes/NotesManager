@@ -68,8 +68,7 @@ class MyCollectionViewCell: UICollectionViewCell {
         }
     }
 }
-// 自定义创建页面flowlayout
-protocol TagFlowLayoutDelegate: NSObjectProtocol {
+protocol TagFlowLayoutDelegate: AnyObject {
     func getCollectionViewHeightAndRows(height: CGFloat, row: Int)
 }
 class TagFlowLayout: UICollectionViewFlowLayout {
@@ -113,8 +112,8 @@ class TagFlowLayout: UICollectionViewFlowLayout {
         return attributes
     }
 }
-// 自定义显示界面flowlayout
-protocol DisplayTagFlowLayoutDelegate: NSObjectProtocol {
+// 委托/代理 设计模式：将一个类要做的事委托给另一个符合要求的类去做
+protocol DisplayTagFlowLayoutDelegate: AnyObject {
     func getCollectionViewHeight(height: CGFloat)
 }
 class DisplayTagFlowLayout: UICollectionViewFlowLayout {
@@ -173,7 +172,9 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
                        UICollectionViewDelegateFlowLayout, DisplayTagFlowLayoutDelegate {
     let privateLabel = UILabel()
     let contentLabel = UILabel()
-    let tagLayOut = DisplayTagFlowLayout()
+    let tagLayOut = DisplayTagFlowLayout() // 用自定义的layout初始化collectionView
+    // 延迟加载属性在第一次调用时才初始化
+    // 因为它依赖taglayout, 而taglayout要在cell构造结束后才存在, 所以实例化cell后才能实例化collectionView, 必须延迟加载
     lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: tagLayOut)
     var currRow: Int = 0
     var noteLabelArray: [String] = []
@@ -185,21 +186,6 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    // 根据cell的约束返回最优size
-//    override func systemLayoutSizeFitting(_ targetSize: CGSize,
-//                                          withHorizontalFittingPriority horizontalFittingPriority: UILayoutPriority,
-//                                          verticalFittingPriority: UILayoutPriority) -> CGSize {
-//        let size = super.systemLayoutSizeFitting(targetSize,
-//                                                 withHorizontalFittingPriority: horizontalFittingPriority,
-//                                                 verticalFittingPriority: verticalFittingPriority)
-//        self.collectionView.layoutIfNeeded()
-//        let collectionViewHeight = self.collectionView.collectionViewLayout.collectionViewContentSize.height
-//        print("CONTENT:\(collectionViewHeight)")
-//        let privateLableHeight = self.privateLable.frame.height
-//        let textLabelHeight = self.textLable.frame.height
-//        let tabelViewCellHeight = collectionViewHeight + privateLableHeight + textLabelHeight
-//        return CGSize(width: size.width, height: tabelViewCellHeight + 20)
-//    }
     func myAdd() {
 //         collection view
         collectionView.backgroundColor = UIColor.white
@@ -220,33 +206,32 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
         self.contentView.addSubview(self.collectionView)
         self.contentView.addSubview(self.privateLabel)
         self.contentView.addSubview(self.contentLabel)
-        self.collectionView.delegate = self
+        collectionView.delegate = self
         collectionView.dataSource = self
         tagLayOut.delegate = self
     }
 
     func myConstraints() {
-        privateLabel.snp.makeConstraints { (make) in // label
-            make.width.height.equalTo(18)
-            make.top.equalToSuperview().offset(12)
-            make.right.equalToSuperview().offset(-16)
+        privateLabel.snp.makeConstraints {
+            $0.width.height.equalTo(18)
+            $0.top.equalToSuperview().offset(12)
+            $0.right.equalToSuperview().offset(-16)
         }
-        collectionView.snp.makeConstraints { make in
-            make.left.equalToSuperview().offset(16)
-            make.right.equalToSuperview().offset(-16)
-            make.top.equalToSuperview().offset(12)
-            make.height.equalTo(1).priority(.low) // 不设置优先级会冲突
+        collectionView.snp.makeConstraints {
+            $0.left.equalToSuperview().offset(16)
+            $0.right.equalToSuperview().offset(-16)
+            $0.top.equalToSuperview().offset(12)
+            $0.height.equalTo(1).priority(.low) // 不设置优先级会冲突
         }
-        contentLabel.snp.makeConstraints { (make) in
-            make.left.equalToSuperview().offset(16)
-            make.right.equalToSuperview().offset(-16)
-            make.top.equalTo(collectionView.snp.bottom)
-            make.bottom.equalToSuperview().offset(-12)
+        contentLabel.snp.makeConstraints {
+            $0.left.equalToSuperview().offset(16)
+            $0.right.equalToSuperview().offset(-16)
+            $0.top.equalTo(collectionView.snp.bottom)
+            $0.bottom.equalToSuperview().offset(-12)
         }
     }
     // collectionview的最大高度 后于tabelview autolayout，所以tabelview高度不能准确更新
     func getCollectionViewHeight(height: CGFloat) {
-        // 更新约束最好用remake重置所有布局，update不确定性太多
         collectionView.snp.updateConstraints {
             $0.height.equalTo(height + 8).priority(.low)
         }
