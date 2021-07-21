@@ -18,7 +18,7 @@
 		D18F011526665CF100AEDE59 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D18F011426665CF100AEDE59 /* Assets.xcassets */; };
 		D18F011826665CF100AEDE59 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = D18F011626665CF100AEDE59 /* LaunchScreen.storyboard */; };
 		D18F014A266A2DA000AEDE59 /* RegisterViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */; };
-		D18F014C266A55A800AEDE59 /* WelcomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */; };
+		D18F014C266A55A800AEDE59 /* DisplayViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F014B266A55A800AEDE59 /* DisplayViewController.swift */; };
 		D19E8147266B7BC000EC1312 /* ForgotViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D19E8146266B7BC000EC1312 /* ForgotViewController.swift */; };
 		D1B78CF626845B0F00781A74 /* CustomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B78CF526845B0E00781A74 /* CustomView.swift */; };
 		D1B78CFA2686EC1A00781A74 /* SQLiteDB.swift in Sources */ = {isa = PBXBuildFile; fileRef = D1B78CF92686EC1A00781A74 /* SQLiteDB.swift */; };
@@ -54,7 +54,7 @@
 		D18F011726665CF100AEDE59 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		D18F011926665CF100AEDE59 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RegisterViewController.swift; sourceTree = "<group>"; };
-		D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeViewController.swift; sourceTree = "<group>"; };
+		D18F014B266A55A800AEDE59 /* DisplayViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DisplayViewController.swift; sourceTree = "<group>"; };
 		D19E8146266B7BC000EC1312 /* ForgotViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ForgotViewController.swift; sourceTree = "<group>"; };
 		D1B78CF526845B0E00781A74 /* CustomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomView.swift; sourceTree = "<group>"; };
 		D1B78CF92686EC1A00781A74 /* SQLiteDB.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SQLiteDB.swift; sourceTree = "<group>"; };
@@ -144,7 +144,7 @@
 				D18F011626665CF100AEDE59 /* LaunchScreen.storyboard */,
 				D18F011926665CF100AEDE59 /* Info.plist */,
 				D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */,
-				D18F014B266A55A800AEDE59 /* WelcomeViewController.swift */,
+				D18F014B266A55A800AEDE59 /* DisplayViewController.swift */,
 				D139CA9D26733BF80066E456 /* global.swift */,
 				D1B78CF526845B0E00781A74 /* CustomView.swift */,
 				D1B78CF92686EC1A00781A74 /* SQLiteDB.swift */,
@@ -331,7 +331,7 @@
 				D18D83F42697E66D00B9377A /* Network.swift in Sources */,
 				D18F010E26665CED00AEDE59 /* SceneDelegate.swift in Sources */,
 				D18F014A266A2DA000AEDE59 /* RegisterViewController.swift in Sources */,
-				D18F014C266A55A800AEDE59 /* WelcomeViewController.swift in Sources */,
+				D18F014C266A55A800AEDE59 /* DisplayViewController.swift in Sources */,
 				D1B78D79268AFC2E00781A74 /* CreateNoteViewController.swift in Sources */,
 				D19E8147266B7BC000EC1312 /* ForgotViewController.swift in Sources */,
 			);

@@ -201,7 +201,7 @@ class RegisterViewController: UIViewController, UITextFieldDelegate {
 //            requestAndResponse(email: textName.text, pwd: textPassWord.text,
 //                               function: .register, method: .post) { [weak self] serverDescription in
 //                if serverDescription.success! {
-//                    let viewController = WelcomeViewController()
+//                    let viewController = DisplayViewController()
 //                    self?.navigationController?.pushViewController(viewController, animated: false)
 //                } else {
 //                    if serverDescription.error?.code == "user_invalid_email_format"{

@@ -9,9 +9,7 @@ import UIKit
 // 自定义UITextField
 class LineTextField: UITextField {
     override func draw(_ rect: CGRect) {
-        // 线条的高度
         let labelLineHeight: CGFloat = 0.5
-        // 线条的颜色
         let labelLineColor = MyColor.eyeColor
         guard let content = UIGraphicsGetCurrentContext() else { return }
         content.setFillColor(labelLineColor.cgColor)
@@ -31,7 +29,6 @@ class MyAlertController: UIAlertController {
     }
     override func addAction(_ action: UIAlertAction ) {
         super.addAction(action)
-        // 通过tintColor实现按钮颜色的修改。
         self.view.tintColor = MyColor.greenColor
     }
 }

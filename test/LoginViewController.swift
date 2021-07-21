@@ -7,7 +7,7 @@
 import UIKit
 import SnapKit
 
-class LoginViewController: UIViewController, UITextFieldDelegate {
+class LoginViewController: UIViewController {
     let textName = LineTextField()
     let textPassWord = LineTextField()
     let errorLabel = UILabel()
@@ -20,15 +20,14 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     override func viewDidLoad() {
         // 父类初始化
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
-        // open and connect database
-//        do {
-//            try DBManager.db?.createTable(table: SQLNote.self)
-//        } catch {
-//            print(DBManager.db?.errorMessage as Any)
-//        }
         try? DBManager.db?.createTable(table: SQLNote.self)
-
+        myUI()
+        myConstraints()
+        // 测试
+        textName.text = "fffgrdcc@163.com"
+        textPassWord.text = "123456"
+    }
+    func myUI() {
         // 导航控制器设置
         self.view.backgroundColor = UIColor.white
         // 当前页和返回页字符不显示
@@ -111,52 +110,43 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         errorLabel.textColor = MyColor.errorColor
         errorLabel.isHidden = true
         self.view.addSubview(errorLabel)
-        myConstraints()
-        // 测试
-        textName.text = "fffgrdcc@163.com"
-        textPassWord.text = "123456"
-    }
-    // 代理方法，响应returnkey点击，回收键盘
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        textField.resignFirstResponder()
-        return true
     }
     func myConstraints() {
         // 约束：以线性方程式的解来确定两个矩形之间的距离关系。 distance(x1, x2) = x2 * a + c
-        loginView.snp.makeConstraints { (make) -> Void in
-            make.width.equalTo(192)
-            make.height.equalTo(64)
-            make.top.equalTo(self.view).offset(124)
-            make.centerX.equalTo(self.view)
+        loginView.snp.makeConstraints {
+            $0.width.equalTo(192)
+            $0.height.equalTo(64)
+            $0.top.equalTo(self.view).offset(124)
+            $0.centerX.equalTo(self.view)
         }
-        textName.snp.makeConstraints { (make) -> Void in
-            make.width.equalTo(297)
-            make.height.equalTo(44)
-            make.top.equalTo(loginView.snp.bottom).offset(48)
-            make.centerX.equalTo(self.view)
+        textName.snp.makeConstraints {
+            $0.width.equalTo(297)
+            $0.height.equalTo(44)
+            $0.top.equalTo(loginView.snp.bottom).offset(48)
+            $0.centerX.equalTo(self.view)
         }
-        textPassWord.snp.makeConstraints { (make) -> Void in
-            make.width.height.centerX.equalTo(textName)
-            make.top.equalTo(textName.snp.bottom).offset(10)
+        textPassWord.snp.makeConstraints {
+            $0.width.height.centerX.equalTo(textName)
+            $0.top.equalTo(textName.snp.bottom).offset(10)
         }
-        loginButton.snp.makeConstraints { (make) -> Void in
-            make.width.height.centerX.equalTo(textName)
-            make.top.equalTo(textPassWord.snp.bottom).offset(40)
+        loginButton.snp.makeConstraints {
+            $0.width.height.centerX.equalTo(textName)
+            $0.top.equalTo(textPassWord.snp.bottom).offset(40)
         }
-        eyeButton.snp.makeConstraints { (make) -> Void in
-            make.width.height.equalTo(44)
+        eyeButton.snp.makeConstraints {
+            $0.width.height.equalTo(44)
         }
-        forgotButton.snp.makeConstraints { (make) -> Void in
-            make.width.equalTo(60)
-            make.height.equalTo(32)
-            make.right.equalTo(textPassWord.snp.right)
-            make.top.equalTo(textPassWord.snp.bottom)
+        forgotButton.snp.makeConstraints {
+            $0.width.equalTo(60)
+            $0.height.equalTo(32)
+            $0.right.equalTo(textPassWord.snp.right)
+            $0.top.equalTo(textPassWord.snp.bottom)
         }
-        errorLabel.snp.makeConstraints { (make) -> Void in
-            make.width.equalTo(80)
-            make.height.equalTo(32)
-            make.left.equalTo(textPassWord)
-            make.top.equalTo(textPassWord.snp.bottom)
+        errorLabel.snp.makeConstraints {
+            $0.width.equalTo(80)
+            $0.height.equalTo(32)
+            $0.left.equalTo(textPassWord)
+            $0.top.equalTo(textPassWord.snp.bottom)
         }
     }
     // 导航响应的方法，视图入栈
@@ -186,7 +176,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
                 // 保存jwt
                 let jwt = serverDescription.jwt
                 userDefault.set(jwt, forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
-                let viewController = WelcomeViewController()
+                let viewController = DisplayViewController()
                 textPassWord.text = ""
                 navigationController?.pushViewController(viewController, animated: false)
                 // 气泡显示
@@ -239,5 +229,12 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         if errorLabel.isHidden == false {
             errorLabel.isHidden = true
         }
+    }
+}
+extension LoginViewController: UITextFieldDelegate {
+    // 代理方法，响应returnkey点击，回收键盘
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
