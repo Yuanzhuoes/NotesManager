@@ -79,6 +79,17 @@ class SQLiteDatabase {
         }
     }
 }
+// singleton
+class DBManager {
+    private static let manager = DBManager()
+    private let db: SQLiteDatabase?
+    static let db: SQLiteDatabase? = manager.db
+    private init () {
+        let url = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+        let dbPath = (url as NSString).appendingPathComponent("myNote.db")
+        db = try? SQLiteDatabase.open(path: dbPath)
+    }
+}
 // wrap prepare statement
 extension SQLiteDatabase {
     func prepareStatement(sql: String) throws -> OpaquePointer? {
@@ -272,16 +283,5 @@ extension SQLiteDatabase {
             count = Int(sqlite3_column_int(countStatement, 0))
         }
         return count
-    }
-}
-// singleton
-class DBManager {
-    private static let manager = DBManager()
-    private let db: SQLiteDatabase?
-    static let db: SQLiteDatabase? = manager.db
-    private init () {
-        let url = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-        let dbPath = (url as NSString).appendingPathComponent("myNote.db")
-        db = try? SQLiteDatabase.open(path: dbPath)
     }
 }

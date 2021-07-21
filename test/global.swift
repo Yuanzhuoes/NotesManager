@@ -19,18 +19,7 @@ struct UserDefaultKeys {
         case userName, userPassword, jwt
     }
 }
-// 保存时间与校验和
-// struct UserDefaultNote {
-//    let localUpdatedaAt: String
-//    let checkSum: String
-// }
 let userDefault = UserDefaults.standard
-// 邮箱格式检测
-func validateEmail(email: String) -> Bool {
-    let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
-    let emailTest: NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
-    return emailTest.evaluate(with: email)
-}
 // 获取时间戳 IS0 8601
 func getDateIS08601() -> String {
     let now = NSDate()
@@ -40,7 +29,7 @@ func getDateIS08601() -> String {
     return formatter.string(from: now as Date)
 }
 
-// 十六进制颜色转换
+// 十六进制颜色转换 结构体类型属性 用类型名调用
 struct MyColor {
     static let placeHolderColor = UIColor(hexColor: "aaaaaa")
     static let eyeColor = UIColor(hexColor: "aaaaaa")
@@ -94,9 +83,15 @@ extension String {
         let dividedFlag: CharacterSet = NSCharacterSet(charactersIn: "/") as CharacterSet
         return self.components(separatedBy: dividedFlag)
     }
+    // 邮箱格式检测
+    var isValidateEmail: Bool {
+        let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
+        let emailTest: NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
+        return emailTest.evaluate(with: self)
+    }
 }
 extension Int {
-    var string: String {
+    var intToString: String {
         return self == 1 ? "公" : "私"
     }
 }

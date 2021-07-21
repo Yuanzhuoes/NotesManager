@@ -32,12 +32,6 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
             }
         }
     }
-
-    // 会卡顿但没bug
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-    }
-
     // 单元格行数 系统默认为1
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 如果没有数据 显示创建按钮
@@ -54,23 +48,17 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
 
     // 初始化和复用单元格
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        // 一定要向下转换为子类
         let cell = tableView.dequeueReusableCell(withIdentifier:
                                                     MyTableViewCell.description(),
                                                 for: indexPath) as? MyTableViewCell
-//        cell?.frame = tableView.bounds
-        // Use this method to force the view to update its layout immediately.
         cell?.layoutIfNeeded()
         cell?.collectionView.reloadData()
-//         单元格的内容显示
-//         先从数据库载入标签 内容和状态 标签数据在自定义tabelview的collection进行可视化
-//        cell?.noteLabelArray = stringToArray(notes?[indexPath.row].tag)
         if let notesLabelArray = notes?[indexPath.row].tag.array {
             cell?.noteLabelArray = notesLabelArray
         } else {
             cell?.noteLabelArray = []
         }
-        cell?.privateLabel.text = notes?[indexPath.row].status.string
+        cell?.privateLabel.text = notes?[indexPath.row].status.intToString
         cell?.contentLabel.attributedText = notes?[indexPath.row].content
             .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
         // cell 选中样式
@@ -94,14 +82,6 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
                 let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
                 let userInfo = UserInfo(authorization: jwt!, nid: id)
                 requestAndResponse(userInfo: userInfo, function: .delete, method: .delete) { _ in
-//                    do {
-//                        // 删除数据库 缓存 UI
-//                        try DBManager.db?.deleteNote(nid: id)
-//                        notes?.remove(at: indexPath.row)
-//                        tableView.deleteRows(at: [indexPath], with: .automatic)
-//                    } catch {
-//                        print(DBManager.db?.errorMessage as Any)
-//                    }
                     try? DBManager.db?.deleteNote(nid: id)
                     notes?.remove(at: indexPath.row)
                     tableView.deleteRows(at: [indexPath], with: .automatic)
@@ -175,27 +155,27 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
             $0.centerX.equalToSuperview()
             $0.top.equalTo(searchBackground.snp.bottom).offset(88)
         }
-        editImageView.snp.makeConstraints { make in
-            make.width.height.equalTo(30)
-            make.centerX.equalTo(bigEditButton)
-            make.top.equalTo(bigEditButton.snp.top).offset(12)
+        editImageView.snp.makeConstraints {
+            $0.width.height.equalTo(30)
+            $0.centerX.equalTo(bigEditButton)
+            $0.top.equalTo(bigEditButton.snp.top).offset(12)
         }
-        editLabel.snp.makeConstraints { make in
-            make.centerX.equalTo(bigEditButton)
-            make.top.equalTo(editImageView.snp.bottom).offset(12)
+        editLabel.snp.makeConstraints {
+            $0.centerX.equalTo(bigEditButton)
+            $0.top.equalTo(editImageView.snp.bottom).offset(12)
         }
-        searchBackground.snp.makeConstraints { (make) in
-            make.height.equalTo(56)
-            make.width.top.leading.equalTo(self.view)
+        searchBackground.snp.makeConstraints {
+            $0.height.equalTo(56)
+            $0.width.top.leading.equalTo(self.view)
         }
-        textSearch.snp.makeConstraints { make in
-            make.centerX.centerY.equalTo(searchBackground)
-            make.height.equalTo(36)
-            make.width.equalTo(searchBackground).offset(-16)
+        textSearch.snp.makeConstraints {
+            $0.centerX.centerY.equalTo(searchBackground)
+            $0.height.equalTo(36)
+            $0.width.equalTo(searchBackground).offset(-16)
         }
-        tableView.snp.makeConstraints { make in
-            make.leading.width.height.equalToSuperview()
-            make.top.equalTo(searchBackground.snp.bottom)
+        tableView.snp.makeConstraints {
+            $0.leading.width.height.equalToSuperview()
+            $0.top.equalTo(searchBackground.snp.bottom)
         }
     }
 
@@ -243,8 +223,8 @@ class WelcomeViewController: UIViewController, UITableViewDataSource, UITableVie
 }
 
 // MARK: -
-
 extension WelcomeViewController {
+    // trailing closure
     func loadData(_ closure: (() -> Void)?) {
         // 请求网络获取所有笔记
         let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
@@ -262,7 +242,7 @@ extension WelcomeViewController {
             } catch {
                 print(DBManager.db?.errorMessage as Any)
             }
-
+            
             DispatchQueue.main.async {
                 closure?()
             }

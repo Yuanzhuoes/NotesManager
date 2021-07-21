@@ -33,10 +33,58 @@ class MyAlertController: UIAlertController {
         super.addAction(action)
         // 通过tintColor实现按钮颜色的修改。
         self.view.tintColor = MyColor.greenColor
-//        也可以通过设置 action.setValue 来实现
-//        action.setValue(UIColor.orange, forKey: "titleTextColor")
     }
 }
+// 自定义tableview with placeholder
+class TextViewWithPlacehodler: UITextView {
+    let placeholder = UILabel()
+    var holder: String
+    func configure() {
+        addSubview(placeholder)
+        updateLabelConstraints()
+        placeholder.textColor = MyColor.grayColor
+        placeholder.text = holder
+        placeholder.font = .systemFont(ofSize: 15)
+    }
+    init(holder: String) {
+        self.holder = holder
+        super.init(frame: .zero, textContainer: nil)
+        configure()
+    }
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    override var text: String! {
+        didSet {
+            if text == nil || text.isEmpty {
+                placeholder.isHidden = false
+            } else {
+                placeholder.isHidden = true
+            }
+        }
+    }
+    override var attributedText: NSAttributedString! {
+        didSet {
+            if attributedText == nil || attributedText.string.isEmpty {
+                placeholder.isHidden = false
+            } else {
+                placeholder.isHidden = true
+            }
+        }
+    }
+    override var textContainerInset: UIEdgeInsets {
+        didSet {
+            updateLabelConstraints()
+        }
+    }
+    private func updateLabelConstraints() {
+        placeholder.snp.remakeConstraints { make in
+            make.top.equalToSuperview().offset(textContainerInset.top)
+            make.left.equalToSuperview().offset(textContainer.lineFragmentPadding)
+        }
+    }
+}
+
 // 自定义MyCollectionViewCell
 class MyCollectionViewCell: UICollectionViewCell {
     let noteLabel = UILabel()
@@ -46,8 +94,6 @@ class MyCollectionViewCell: UICollectionViewCell {
         // 笔记标签 默认单行
         noteLabel.font = UIFont.systemFont(ofSize: 11)
         noteLabel.textAlignment = .center
-        // 失效
-//        noteLabel.layer.cornerRadius = 3
         noteLabel.textColor = MyColor.textColor
         noteLabel.backgroundColor = MyColor.navigationColor
         self.contentView.addSubview(view)
@@ -113,6 +159,7 @@ class TagFlowLayout: UICollectionViewFlowLayout {
     }
 }
 // 委托/代理 设计模式：将一个类要做的事委托给另一个符合要求的类去做
+// AnyObject 类专属协议
 protocol DisplayTagFlowLayoutDelegate: AnyObject {
     func getCollectionViewHeight(height: CGFloat)
 }
@@ -210,7 +257,6 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
         collectionView.dataSource = self
         tagLayOut.delegate = self
     }
-
     func myConstraints() {
         privateLabel.snp.makeConstraints {
             $0.width.height.equalTo(18)

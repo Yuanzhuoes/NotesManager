@@ -6,7 +6,6 @@
 //
 import Foundation
 import Alamofire
-
 // url
 extension URL {
     enum Scheme: String {
@@ -37,7 +36,6 @@ extension URL {
             comps.path = "/api/notes"
         case.createNote:
             comps.path = "/api/note"
-        // 值绑定的case
         case .delete(let nid):
             comps.path = "/api/notes/\(nid)"
         }
@@ -177,13 +175,13 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                             print("API: \(curl)")
                         }
                     }
-                    // 大括号是closure，匿名函数，response是参数，捕获上下文
                     switch response.result {
                     case .success(let json):
                         guard let data = response.data else { return }
                         // 解析JSON和捕获异常
                         do {
                             let serverDescription = try JSONDecoder().decode(ServerDescription.self, from: data)
+                            // capture serverDescription
                             completion(serverDescription)
                             print(json)
                         } catch let jsonErr {

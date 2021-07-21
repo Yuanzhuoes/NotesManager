@@ -8,69 +8,14 @@
 import UIKit
 import CryptoSwift
 
-class TextViewWithPlacehodler: UITextView {
-    let label = UILabel()
-
-    func configure() {
-        addSubview(label)
-        updateConstraints()
-        label.textColor = MyColor.grayColor
-        label.font = .systemFont(ofSize: 15)
-        label.text = "请输入标签，示例：标签/标签"
-    }
-
-    override init(frame: CGRect, textContainer: NSTextContainer?) {
-        super.init(frame: frame, textContainer: textContainer)
-        configure()
-    }
-
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-        configure()
-    }
-
-    override var text: String! {
-        didSet {
-            if text == nil || text.isEmpty {
-                label.text = "请输入标签，示例：标签/标签"
-            } else {
-                label.text = ""
-            }
-        }
-    }
-
-    override var attributedText: NSAttributedString! {
-        didSet {
-            if attributedText == nil || attributedText.string.isEmpty {
-                label.text = "请输入标签，示例：标签/标签"
-            } else {
-                label.text = ""
-            }
-        }
-    }
-
-    override var textContainerInset: UIEdgeInsets {
-        didSet {
-            updateConstraints()
-        }
-    }
-
-    private func udpateLabelConstraints() {
-        label.snp.remakeConstraints { make in
-            make.top.equalToSuperview().offset(textContainerInset.top)
-            make.left.equalToSuperview().offset(textContainer.lineFragmentPadding)
-        }
-    }
-}
-
 class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
                                 UITextViewDelegate, UICollectionViewDelegate,
                                 UICollectionViewDataSource,
                                 UICollectionViewDelegateFlowLayout, TagFlowLayoutDelegate {
     let contentView = UIView()
     let scrollView = UIScrollView()
-    let textLabelView = TextViewWithPlacehodler()
-    let textContenView = UITextView()
+    let textLabelView = TextViewWithPlacehodler(holder: "请输入标签，示例：标签/标签")
+    let textContenView = TextViewWithPlacehodler(holder: "请输入搜记内容")
     let tagLayOut = TagFlowLayout()
     // lazy load memory property. collectionView 第一次被调用时才初始化, 因为taglayout先于初始化
     lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: tagLayOut)
@@ -79,11 +24,8 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
     var statusSegment = UISegmentedControl()
     let labelLine = UIView()
     let contentLine = UIView()
-    let textLabelPlaceHolder = UILabel()
-    let textContentPlaceHolder = UILabel()
     let screenFrame = UIScreen.main.bounds
-    var dataArrary: [String] = []
-
+    var dataArrary = [String]()
     var onSave: (() -> Void)?
 
     override func viewDidLoad() {
@@ -153,34 +95,21 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
         // placeholder 的显示
         if textView == textLabelView {
             textLabelView.text = textView.text
-//            dataArrary = stringToArray(textLabelView.text)
             dataArrary = textLabelView.text.array
             // reload dataArrary to collectionView
             collectionView.reloadData()
-            if textLabelView.text == nil || textLabelView.text == "" {
-                textLabelPlaceHolder.text = "请输入标签，示例：标签/标签"
-            } else {
-                textLabelPlaceHolder.text = ""
-            }
         }
         if textView == textContenView {
             textContenView.text = textView.text
-            if textContenView.text == nil || textContenView.text == "" {
-                textContentPlaceHolder.text = "请输入搜记内容"
-            } else {
-                textContentPlaceHolder.text = ""
-            }
         }
-
         // 激活保存按钮
-        if textContentPlaceHolder.text == "" && textLabelPlaceHolder.text == "" {
+        if textContenView.placeholder.isHidden && textLabelView.placeholder.isHidden {
             saveButton.isEnabled = true
             saveButton.tintColor = MyColor.greenColor
         } else {
             saveButton.isEnabled = false
             saveButton.tintColor = MyColor.grayColor
         }
-
         // 限制输入大小？
     }
 
@@ -240,13 +169,6 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
         textContenView.font = UIFont.systemFont(ofSize: 15)
         textContenView.textColor = MyColor.textColor
         textContenView.tintColor = MyColor.greenColor
-        // placeholder
-        textLabelPlaceHolder.textColor = MyColor.grayColor
-        textLabelPlaceHolder.font = .systemFont(ofSize: 15)
-        textLabelPlaceHolder.text = "请输入标签，示例：标签/标签"
-        textContentPlaceHolder.textColor = MyColor.grayColor
-        textContentPlaceHolder.font = .systemFont(ofSize: 15)
-        textContentPlaceHolder.text = "请输入搜记内容"
         self.view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(statusLabel)
@@ -256,8 +178,6 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
         contentView.addSubview(textContenView)
         contentView.addSubview(labelLine)
         contentView.addSubview(contentLine)
-        // contentView.addSubview(textLabelPlaceHolder)
-        contentView.addSubview(textContentPlaceHolder)
         scrollView.delegate = self
         textLabelView.delegate = self
         textContenView.delegate = self
@@ -306,14 +226,6 @@ class CreateNoteViewController: UIViewController, UIScrollViewDelegate,
             make.top.equalTo(collectionView.snp.bottom)
             make.left.right.equalTo(collectionView)
             make.bottom.equalTo(0)
-        }
-//        textLabelPlaceHolder.snp.makeConstraints { make in
-//            make.top.equalTo(textLabelView).offset(textLabelView.textContainerInset.top)
-//            make.left.equalTo(textLabelView).offset(textLabelView.textContainer.lineFragmentPadding)
-//        }
-        textContentPlaceHolder.snp.makeConstraints { make in
-            make.top.equalTo(textContenView).offset(10)
-            make.left.equalTo(textContenView)
         }
     }
     @objc func saveNote() {

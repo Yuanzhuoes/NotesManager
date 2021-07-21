@@ -227,7 +227,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
     }
     // 错误提示标签响应
     @objc func formatDetection() {
-        if validateEmail(email: textName.text!) == true {
+        if textName.text!.isValidateEmail {
             errorLabel.isHidden = true
         } else {
             errorLabel.text = "邮箱格式错误"
