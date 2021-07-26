@@ -99,6 +99,7 @@ class LoginViewController: UIViewController {
                             .withTintColor(MyColor.eyeColor, renderingMode: .automatic), for: .normal)
         // 更改自定义图片的大小, top：19是btn的top插入19个px,相当于图片向下压缩19px，参照是button的frame
         eyeButton.imageEdgeInsets = UIEdgeInsets(top: 19, left: 16, bottom: 19, right: 16)
+        // view和controller之间的通信，当view被点击，通知self(controller), controller执行@objc方法
         eyeButton.addTarget(self, action: #selector(LoginViewController.eyeButtonTapped), for: .touchUpInside)
         // 关闭按钮高亮状态
         eyeButton.adjustsImageWhenHighlighted = false

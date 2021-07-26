@@ -11,11 +11,12 @@ class DisplayViewController: UIViewController {
     let editButton = UIButton(type: .custom)
     let logOutButton = UIButton(type: .system)
     let bigEditButton = UIButton(type: .system)
-    let searchBackground = UIView()
-    let textSearch = UITextField()
     let tableView = UITableView()
     let editImageView = UIImageView()
     let editLabel = UILabel()
+    let searchController = UISearchController()
+    var searchResults = [SQLNote]()
+    var pendingRequestWorkItem: DispatchWorkItem?
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -55,10 +56,26 @@ class DisplayViewController: UIViewController {
         editLabel.textColor = MyColor.grayColor
         // 编辑按钮的响应
         bigEditButton.addTarget(self, action: #selector(createNotes), for: .touchUpInside)
-        // 搜索框的背景
-        searchBackground.backgroundColor = MyColor.navigationColor
-        // 搜索框 点击搜索框 隐藏导航栏 整体上移 图标居右 进入搜索页面
-        textSearch.borderStyle = .roundedRect
+//         搜索框 点击搜索框 隐藏导航栏 整体上移 图标居右 进入搜索页面
+        let searchBar = searchController.searchBar
+        searchBar.placeholder = "搜索"
+        searchBar.isTranslucent = false
+        searchBar.backgroundImage = UIImage()
+        searchBar.searchTextField.borderStyle = .none
+        searchBar.searchTextField.backgroundColor = UIColor.white
+        searchBar.barTintColor = MyColor.navigationColor
+        searchBar.tintColor = MyColor.greenColor
+        searchBar.searchTextField.clearButtonMode = .never
+        // 全局修改
+        UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self])
+            .defaultTextAttributes = [NSAttributedString.Key.foregroundColor: MyColor.textColor]
+        UIBarButtonItem.appearance(whenContainedInInstancesOf: [UISearchBar.self]).title = "取消"
+        // 搜索控制器设置
+        navigationItem.hidesSearchBarWhenScrolling = false
+        navigationItem.searchController = searchController
+        searchController.hidesNavigationBarDuringPresentation = true // 点击搜索栏隐藏导航栏
+        searchController.obscuresBackgroundDuringPresentation = false // 展示结果时不变暗
+        searchController.searchResultsUpdater = self
         // 表格设置
         // 左右边距
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -68,14 +85,11 @@ class DisplayViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         // 添加顺序影响显示效果?
-        self.view.addSubview(searchBackground)
-        self.view.addSubview(textSearch)
         self.view.addSubview(tableView)
         self.view.addSubview(bigEditButton)
         bigEditButton.addSubview(editImageView)
         bigEditButton.addSubview(editLabel)
     }
-
     func myConstraints() {
         editButton.snp.makeConstraints {
             $0.width.height.equalTo(16)
@@ -84,7 +98,7 @@ class DisplayViewController: UIViewController {
             $0.width.equalTo(195)
             $0.height.equalTo(88)
             $0.centerX.equalToSuperview()
-            $0.top.equalTo(searchBackground.snp.bottom).offset(88)
+            $0.top.equalToSuperview().offset(88)
         }
         editImageView.snp.makeConstraints {
             $0.width.height.equalTo(30)
@@ -95,21 +109,11 @@ class DisplayViewController: UIViewController {
             $0.centerX.equalTo(bigEditButton)
             $0.top.equalTo(editImageView.snp.bottom).offset(12)
         }
-        searchBackground.snp.makeConstraints {
-            $0.height.equalTo(56)
-            $0.width.top.leading.equalTo(self.view)
-        }
-        textSearch.snp.makeConstraints {
-            $0.centerX.centerY.equalTo(searchBackground)
-            $0.height.equalTo(36)
-            $0.width.equalTo(searchBackground).offset(-16)
-        }
         tableView.snp.makeConstraints {
             $0.leading.width.height.equalToSuperview()
-            $0.top.equalTo(searchBackground.snp.bottom)
+            $0.top.equalToSuperview()
         }
     }
-
     @objc func showBubble() {
         let bubble = MyAlertController(title: "", message: "确定要退出登陆吗？", preferredStyle: .alert)
         let yes = UIAlertAction(title: "确定", style: .default) { _ in
@@ -155,72 +159,140 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
     // 单元格行数 系统默认为1
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         // 如果没有数据 显示创建按钮
-        guard let count = notes?.count else {
-            return 0
-        }
-        if count == 0 {
-            bigEditButton.isHidden = false
+        if searchController.isActive {
+            return searchResults.count
         } else {
-            bigEditButton.isHidden = true
+            guard let count = notes?.count else {
+                return 0
+            }
+            if count == 0 {
+                bigEditButton.isHidden = false
+            } else {
+                bigEditButton.isHidden = true
+            }
+            return count
         }
-        return count
     }
 
     // 初始化和复用单元格
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier:
-                                                    MyTableViewCell.description(),
+                                                MyTableViewCell.description(),
                                                 for: indexPath) as? MyTableViewCell
-        cell?.layoutIfNeeded()
-        cell?.collectionView.reloadData()
-        if let notesLabelArray = notes?[indexPath.row].tag.array {
-            cell?.noteLabelArray = notesLabelArray
+        if searchController.isActive {
+            cell?.layoutIfNeeded()
+            cell?.collectionView.reloadData()
+            cell?.noteLabelArray = searchResults[indexPath.row].tag.array
+            cell?.privateLabel.text = searchResults[indexPath.row].status.intToString
+            cell?.contentLabel.attributedText = searchResults[indexPath.row].content
+                .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
+            cell?.selectionStyle = .none
+            return cell!
         } else {
-            cell?.noteLabelArray = []
+            cell?.layoutIfNeeded()
+            cell?.collectionView.reloadData()
+            if let notesLabelArray = notes?[indexPath.row].tag.array {
+                cell?.noteLabelArray = notesLabelArray
+            } else {
+                cell?.noteLabelArray = []
+            }
+            cell?.privateLabel.text = notes?[indexPath.row].status.intToString
+            cell?.contentLabel.attributedText = notes?[indexPath.row].content
+                .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
+            // cell 选中样式
+            cell?.selectionStyle = .none
+            return cell!
         }
-        cell?.privateLabel.text = notes?[indexPath.row].status.intToString
-        cell?.contentLabel.attributedText = notes?[indexPath.row].content
-            .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
-        // cell 选中样式
-        cell?.selectionStyle = .none
-        return cell!
     }
     // 左滑删除按钮
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt
                     indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let deleteAction = UIContextualAction(style: .normal, title: "删除") { (_, _, completionHandler) in
-            // 气泡 有空封装
-            let bubble = MyAlertController(title: "", message: "确定要删除该笔记吗？", preferredStyle: .alert)
-            // 气泡的两个按钮
-            let cancel = UIAlertAction(title: "取消", style: .default, handler: nil)
-            let yes = UIAlertAction(title: "确定", style: .default) { _ in
-                // 请求服务器 先获取笔记id和用户jwt
-                guard let id = notes?[indexPath.row].id else {
-                    print("Error: id is nil")
-                    return
+        if !searchController.isActive {
+            let deleteAction = UIContextualAction(style: .normal, title: "删除") { (_, _, completionHandler) in
+                // 气泡 有空封装
+                let bubble = MyAlertController(title: "", message: "确定要删除该笔记吗？", preferredStyle: .alert)
+                // 气泡的两个按钮
+                let cancel = UIAlertAction(title: "取消", style: .default, handler: nil)
+                let yes = UIAlertAction(title: "确定", style: .default) { _ in
+                    // 请求服务器 先获取笔记id和用户jwt
+                    guard let id = notes?[indexPath.row].id else {
+                        print("Error: id is nil")
+                        return
+                    }
+                    let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+                    let userInfo = UserInfo(authorization: jwt!, nid: id)
+                    requestAndResponse(userInfo: userInfo, function: .delete, method: .delete) { _ in
+                        try? DBManager.db?.deleteNote(nid: id)
+                        notes?.remove(at: indexPath.row)
+                        tableView.deleteRows(at: [indexPath], with: .automatic)
+                    }
                 }
-                let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
-                let userInfo = UserInfo(authorization: jwt!, nid: id)
-                requestAndResponse(userInfo: userInfo, function: .delete, method: .delete) { _ in
-                    try? DBManager.db?.deleteNote(nid: id)
-                    notes?.remove(at: indexPath.row)
-                    tableView.deleteRows(at: [indexPath], with: .automatic)
-                }
+                bubble.addAction(yes)
+                bubble.addAction(cancel)
+                self.present(bubble, animated: true, completion: nil)
+                // 需要返回true，否则没有反应
+                completionHandler(true)
             }
-            bubble.addAction(yes)
-            bubble.addAction(cancel)
-            self.present(bubble, animated: true, completion: nil)
-            // 需要返回true，否则没有反应
-            completionHandler(true)
+            deleteAction.backgroundColor = MyColor.deleteColor
+            let config = UISwipeActionsConfiguration(actions: [deleteAction])
+            // 取消拉太长后自动删除
+            config.performsFirstActionWithFullSwipe = false
+            return config
+        } else {
+            return UISwipeActionsConfiguration()
         }
-        deleteAction.backgroundColor = MyColor.deleteColor
-        let config = UISwipeActionsConfiguration(actions: [deleteAction])
-        // 取消拉太长后自动删除
-        config.performsFirstActionWithFullSwipe = false
-        return config
+    }
+    // 选择单元格
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        // 进入我的搜记页面
+        guard let myNote = notes?[indexPath.row] else {
+            return
+        }
+        let viewController = UpdataNoteViewController()
+        viewController.textLabelView.text = myNote.tag
+        viewController.noteLabelArray = myNote.tag.array
+        viewController.textContenView.text = myNote.content
+        viewController.nid = myNote.id
+        // 状态标签怎么传
+        self.navigationController?.pushViewController(viewController, animated: true)
     }
 }
-
+extension DisplayViewController: UISearchResultsUpdating {
+    func updateSearchResults(for searchController: UISearchController) {
+        let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+        let userInfo = UserInfo(authorization: jwt)
+        pendingRequestWorkItem?.cancel()
+        let requestWorkItem = DispatchWorkItem { [self] in
+            requestAndResponse(userInfo: userInfo,
+                               function: .search,
+                               method: .get,
+                               searchText: searchController.searchBar.text) { [self] serverDescription in
+                if serverDescription.pagination?.total == 0 {
+                    // 无搜索结果
+                } else {
+                    guard let items = serverDescription.items else {
+                        return
+                    }
+                    searchResults.removeAll()
+                    for item in items {
+                        guard let id = item.id, let tag = item.title, let content = item.content else {
+                            return
+                        }
+                        guard let status = (item.isPublic == true) ? 1 : 0 else {
+                            return
+                        }
+                        searchResults.append(SQLNote(id: id, tag: tag, content: content, status: status))
+                    }
+                }
+            }
+            tableView.reloadData()
+        }
+        pendingRequestWorkItem = requestWorkItem
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300), execute: requestWorkItem)
+    }
+}
+extension DisplayViewController: UISearchControllerDelegate {
+}
 // MARK: -
 extension DisplayViewController {
     // trailing closure

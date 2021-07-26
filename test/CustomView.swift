@@ -81,7 +81,6 @@ class TextViewWithPlacehodler: UITextView {
         }
     }
 }
-
 // 自定义MyCollectionViewCell
 class MyCollectionViewCell: UICollectionViewCell {
     let noteLabel = UILabel()
@@ -235,6 +234,8 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
         collectionView.backgroundColor = UIColor.white
         collectionView.register(MyCollectionViewCell.self, forCellWithReuseIdentifier: MyCollectionViewCell.description())
         collectionView.isScrollEnabled = false
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.allowsSelection = true
         // 状态标签 固定大小 collection view
         privateLabel.font = UIFont.systemFont(ofSize: 11)
         privateLabel.textAlignment = .center

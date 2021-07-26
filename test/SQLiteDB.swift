@@ -81,8 +81,10 @@ class SQLiteDatabase {
 }
 // singleton
 class DBManager {
+    private var db: SQLiteDatabase?
+    // 隐藏单例
     private static let manager = DBManager()
-    private let db: SQLiteDatabase?
+    // 只暴露指针
     static let db: SQLiteDatabase? = manager.db
     private init () {
         let url = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
@@ -90,6 +92,16 @@ class DBManager {
         db = try? SQLiteDatabase.open(path: dbPath)
     }
 }
+// another singleton
+// class DBManager {
+//    let db: SQLiteDatabase?
+//    static let manager = DBManager()
+//    private init () {
+//        let url = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
+//        let dbPath = (url as NSString).appendingPathComponent("myNote.db")
+//        db = try? SQLiteDatabase.open(path: dbPath)
+//    }
+// }
 // wrap prepare statement
 extension SQLiteDatabase {
     func prepareStatement(sql: String) throws -> OpaquePointer? {

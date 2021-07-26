@@ -1,19 +1,18 @@
 //
-//  CreateNoteViewController.swift
+//  UpdateNoteViewController.swift
 //  test
 //
-//  Created by 李远卓 on 2021/6/29.
+//  Created by 李远卓 on 2021/7/24.
 //
 
 import UIKit
 import CryptoSwift
 
-class CreateNoteViewController: UIViewController {
+class UpdataNoteViewController: UIViewController {
     let contentView = UIView()
     let scrollView = UIScrollView()
     let textLabelView = TextViewWithPlacehodler(holder: "请输入标签，示例：标签/标签")
     let textContenView = TextViewWithPlacehodler(holder: "请输入搜记内容")
-    // 用自定义的layout构建collectionview
     let tagLayOut = TagFlowLayout()
     lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: tagLayOut)
     let saveButton = UIButton(type: .system)
@@ -24,7 +23,7 @@ class CreateNoteViewController: UIViewController {
     let screenFrame = UIScreen.main.bounds
     var noteLabelArray = [String]()
     var onSave: (() -> Void)?
-
+    var nid: String = ""
     override func viewDidLoad() {
         super.viewDidLoad()
         myUI()
@@ -33,7 +32,7 @@ class CreateNoteViewController: UIViewController {
     func myUI() {
         self.view.backgroundColor = UIColor.white
         // 导航栏设置
-        self.title = "创建搜记" // 样式
+        self.title = "我的搜记" // 样式
         // 不透明，view.top下移
         self.navigationController?.navigationBar.isTranslucent = false
         self.navigationController?.navigationBar.barTintColor = MyColor.navigationColor
@@ -55,6 +54,8 @@ class CreateNoteViewController: UIViewController {
         statusSegment.setTitleTextAttributes([.foregroundColor: MyColor.grayColor], for: .normal)
         statusSegment.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
         statusSegment.selectedSegmentIndex = 0
+        statusSegment.addTarget(self, action: #selector(activeSaveButton), for: .valueChanged)
+//        statusSegment.selectedSegmentIndex = 0
         // scroll view
         // display area
         scrollView.frame = screenFrame
@@ -136,7 +137,7 @@ class CreateNoteViewController: UIViewController {
             $0.bottom.equalTo(0)
         }
     }
-    func prepareNote(title: String, content: String, status: Int) -> UserInfo {
+    func prepareNote(title: String, content: String, status: Int, nid: String) -> UserInfo {
         let localUpdatedAt = getDateIS08601()
         let checksum = (title + content).crc32()
         let status = status == 1 ? true : false
@@ -146,7 +147,7 @@ class CreateNoteViewController: UIViewController {
                                    status: status,
                                    checksum: checksum,
                                    localUpdatedAt: localUpdatedAt)
-        let userInfo = UserInfo(authorization: jwt, note: myNote)
+        let userInfo = UserInfo(authorization: jwt, nid: nid, note: myNote)
         return userInfo
     }
     @objc func saveNote() {
@@ -154,44 +155,45 @@ class CreateNoteViewController: UIViewController {
         // 获取用户信息
         let userInfo = prepareNote(title: textLabelView.text,
                                    content: textContenView.text,
-                                   status: statusSegment.selectedSegmentIndex)
+                                   status: statusSegment.selectedSegmentIndex,
+                                   nid: nid)
         // 上传笔记到服务器
-        requestAndResponse(userInfo: userInfo, function: .createNotes, method: .post) { serverDescription in
-            if serverDescription.id != nil {
-                // 禁用保存按钮 防止重复保存一样的数据
-                self.saveButton.isEnabled = false
-                // 获取笔记id
-                let nid = serverDescription.id
-                // 获取校验和时间
-                let status = userInfo.note?.status == true ? 1 : 0
-                // 将笔记信息写入数据库
-                do {
-                    try DBManager.db?.insertNote(myNote: SQLNote(id: nid!, tag: (userInfo.note?.title)!,
-                                                content: (userInfo.note?.content)!,
-                                                status: status))
-                } catch {
-                    print(DBManager.db?.errorMessage as Any)
-                }
-                // 更新缓存
-                do {
-                    notes = try DBManager.db?.queryAllSQLNotes()
-                } catch {
-                    print(DBManager.db?.errorMessage as Any)
-                }
-                // 显示保存成功气泡 封装一下
-                let bubble = UIAlertController(title: "", message: "保存成功", preferredStyle: .alert)
-                self.present(bubble, animated: true, completion: nil)
-                // 气泡显示延时消失
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
-                    bubble.dismiss(animated: true, completion: nil)
-                })
-
-                self.onSave?()
+        requestAndResponse(userInfo: userInfo, function: .updateNotes, method: .post) { _ in
+            // 禁用保存按钮 防止重复保存一样的数据
+            self.saveButton.isEnabled = false
+            // 获取笔记id
+            // 获取校验和时间
+            let status = userInfo.note?.status == true ? 1 : 0
+            do {
+                try DBManager.db?.updateNote(myNote: SQLNote(id: userInfo.nid!,
+                                                             tag: (userInfo.note?.title)!,
+                                                             content: (userInfo.note?.content)!,
+                                                             status: status))
+            } catch {
+                print(DBManager.db?.errorMessage as Any)
             }
+            // 更新缓存
+            do {
+                notes = try DBManager.db?.queryAllSQLNotes()
+            } catch {
+                print(DBManager.db?.errorMessage as Any)
+            }
+            // 显示保存成功气泡 封装一下
+            let bubble = UIAlertController(title: "", message: "更新成功", preferredStyle: .alert)
+            self.present(bubble, animated: true, completion: nil)
+            // 气泡显示延时消失
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
+                bubble.dismiss(animated: true, completion: nil)
+            })
+            self.onSave?()
         }
     }
+    @objc func activeSaveButton() {
+        saveButton.isEnabled = true
+        saveButton.tintColor = MyColor.greenColor
+    }
 }
-extension CreateNoteViewController: UICollectionViewDataSource {
+extension UpdataNoteViewController: UICollectionViewDataSource {
     // cell个数
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         if noteLabelArray.count == 1 && noteLabelArray[0] == "" {
@@ -210,7 +212,7 @@ extension CreateNoteViewController: UICollectionViewDataSource {
     }
 }
 // UICollectionViewDelegate是UICollectionViewDelegateFlowLayout的子协议，写后者就行了
-extension CreateNoteViewController: UICollectionViewDelegateFlowLayout,
+extension UpdataNoteViewController: UICollectionViewDelegateFlowLayout,
                                     TagFlowLayoutDelegate {
     // 每个item的大小, 坐标是系统计算，item之间的间距由自定义layout调整，长度由函数实现
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
@@ -247,7 +249,7 @@ extension CreateNoteViewController: UICollectionViewDelegateFlowLayout,
         }
     }
 }
-extension CreateNoteViewController: UITextViewDelegate {
+extension UpdataNoteViewController: UITextViewDelegate {
     // placeholder+字符串分割+更新数据
     func textViewDidChange(_ textView: UITextView) {
         // placeholder 的显示

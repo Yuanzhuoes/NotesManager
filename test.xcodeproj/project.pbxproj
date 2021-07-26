@@ -10,6 +10,7 @@
 		3544D5F4269C8F9A0036A949 /* URLCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3544D5F3269C8F9A0036A949 /* URLCompositionTests.swift */; };
 		80B4202A5D37898AA55AF8A1 /* Pods_test.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = BF57F25F55E47AC3CC767E2E /* Pods_test.framework */; };
 		D139CA9E26733BF80066E456 /* global.swift in Sources */ = {isa = PBXBuildFile; fileRef = D139CA9D26733BF80066E456 /* global.swift */; };
+		D178F75726ABCF1000336FE7 /* UpdateNoteViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = D178F75626ABCF1000336FE7 /* UpdateNoteViewController.swift */; };
 		D18D83F42697E66D00B9377A /* Network.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18D83F32697E66300B9377A /* Network.swift */; };
 		D18F010C26665CED00AEDE59 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F010B26665CED00AEDE59 /* AppDelegate.swift */; };
 		D18F010E26665CED00AEDE59 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = D18F010D26665CED00AEDE59 /* SceneDelegate.swift */; };
@@ -44,6 +45,7 @@
 		A4E581CA2CE330A2BB560693 /* Pods-test.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-test.release.xcconfig"; path = "Target Support Files/Pods-test/Pods-test.release.xcconfig"; sourceTree = "<group>"; };
 		BF57F25F55E47AC3CC767E2E /* Pods_test.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_test.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		D139CA9D26733BF80066E456 /* global.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = global.swift; sourceTree = "<group>"; };
+		D178F75626ABCF1000336FE7 /* UpdateNoteViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UpdateNoteViewController.swift; sourceTree = "<group>"; };
 		D18D83F32697E66300B9377A /* Network.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network.swift; sourceTree = "<group>"; };
 		D18F010826665CED00AEDE59 /* test.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = test.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		D18F010B26665CED00AEDE59 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -145,6 +147,7 @@
 				D18F011926665CF100AEDE59 /* Info.plist */,
 				D18F0149266A2DA000AEDE59 /* RegisterViewController.swift */,
 				D18F014B266A55A800AEDE59 /* DisplayViewController.swift */,
+				D178F75626ABCF1000336FE7 /* UpdateNoteViewController.swift */,
 				D139CA9D26733BF80066E456 /* global.swift */,
 				D1B78CF526845B0E00781A74 /* CustomView.swift */,
 				D1B78CF92686EC1A00781A74 /* SQLiteDB.swift */,
@@ -324,6 +327,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D139CA9E26733BF80066E456 /* global.swift in Sources */,
+				D178F75726ABCF1000336FE7 /* UpdateNoteViewController.swift in Sources */,
 				D1B78CF626845B0F00781A74 /* CustomView.swift in Sources */,
 				D18F011026665CED00AEDE59 /* LoginViewController.swift in Sources */,
 				D18F010C26665CED00AEDE59 /* AppDelegate.swift in Sources */,
