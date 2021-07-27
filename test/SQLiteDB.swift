@@ -151,20 +151,49 @@ extension SQLiteDatabase {
         print("Successfully inserted row.")
     }
 }
+// delete
 extension SQLiteDatabase {
-    // insert all notes
-    func insertAllNotesToDB(notes: [ServerDescription.Items]) {
-        for note in notes {
-            let id = note.id
-            let tag = note.title
-            let content = note.content
-            let status = note.isPublic == true ? 1 : 0
-            do {
-                try DBManager.db?.insertNote(myNote: SQLNote(id: id!, tag: tag!, content: content!, status: status))
-            } catch {
-                print(DBManager.db?.errorMessage as Any)
-            }
+    func deleteNote (nid: String) throws {
+        let deleteSQL = "DELETE FROM SQLNote WHERE Id = ?;"
+        let deleteStatement = try prepareStatement(sql: deleteSQL)
+        defer {
+            sqlite3_finalize(deleteStatement)
         }
+        let id = nid as NSString
+        guard
+            sqlite3_bind_text(deleteStatement, 1, id.utf8String, -1, nil) == SQLITE_OK
+        else {
+            throw SQLiteError.bind(message: errorMessage)
+        }
+        guard sqlite3_step(deleteStatement) == SQLITE_DONE else {
+            throw SQLiteError.step(message: errorMessage)
+        }
+        print("Successfully delete row.")
+    }
+}
+// update
+extension SQLiteDatabase {
+    func updateNote (myNote: SQLNote) throws {
+        let updateSQL = "UPDATE SQLNote SET Tag = ?, Content = ?, Status = ? WHERE Id = ?;"
+        let updateStatement = try prepareStatement(sql: updateSQL)
+        defer {
+          sqlite3_finalize(updateStatement)
+        }
+        let id = myNote.id as NSString
+        let tag = myNote.tag as NSString
+        let content = myNote.content as NSString
+        guard
+            sqlite3_bind_text(updateStatement, 1, tag.utf8String, -1, nil) == SQLITE_OK &&
+            sqlite3_bind_text(updateStatement, 2, content.utf8String, -1, nil) == SQLITE_OK &&
+                sqlite3_bind_int(updateStatement, 3, Int32(myNote.status)) == SQLITE_OK &&
+                sqlite3_bind_text(updateStatement, 4, id.utf8String, -1, nil) == SQLITE_OK
+        else {
+            throw SQLiteError.bind(message: errorMessage)
+        }
+        guard sqlite3_step(updateStatement) == SQLITE_DONE else {
+            throw SQLiteError.step(message: errorMessage)
+        }
+        print("Successfully update row.")
     }
 }
 // query with nid
@@ -206,6 +235,22 @@ extension SQLiteDatabase {
         return SQLNote(id: id, tag: tag, content: content, status: Int(status))
     }
 }
+// insert all notes
+extension SQLiteDatabase {
+    func insertAllNotesToDB(notes: [ServerDescription.Items]) {
+        for note in notes {
+            let id = note.id
+            let tag = note.title
+            let content = note.content
+            let status = note.isPublic == true ? 1 : 0
+            do {
+                try DBManager.db?.insertNote(myNote: SQLNote(id: id!, tag: tag!, content: content!, status: status))
+            } catch {
+                print(DBManager.db?.errorMessage as Any)
+            }
+        }
+    }
+}
 // select from offset to limit
 extension SQLiteDatabase {
     func queryAllSQLNotes() throws -> [SQLNote] {
@@ -235,51 +280,6 @@ extension SQLiteDatabase {
             notesArray.append(SQLNote(id: id, tag: tag, content: content, status: Int(status))) //
         }
         return notesArray
-    }
-}
-// update
-extension SQLiteDatabase {
-    func updateNote (myNote: SQLNote) throws {
-        let updateSQL = "UPDATE SQLNote SET Tag = ?, Content = ?, Status = ? WHERE Id = ?;"
-        let updateStatement = try prepareStatement(sql: updateSQL)
-        defer {
-          sqlite3_finalize(updateStatement)
-        }
-        let id = myNote.id as NSString
-        let tag = myNote.tag as NSString
-        let content = myNote.content as NSString
-        guard
-            sqlite3_bind_text(updateStatement, 1, tag.utf8String, -1, nil) == SQLITE_OK &&
-            sqlite3_bind_text(updateStatement, 2, content.utf8String, -1, nil) == SQLITE_OK &&
-                sqlite3_bind_int(updateStatement, 3, Int32(myNote.status)) == SQLITE_OK &&
-                sqlite3_bind_text(updateStatement, 4, id.utf8String, -1, nil) == SQLITE_OK
-        else {
-            throw SQLiteError.bind(message: errorMessage)
-        }
-        guard sqlite3_step(updateStatement) == SQLITE_DONE else {
-            throw SQLiteError.step(message: errorMessage)
-        }
-        print("Successfully update row.")
-    }
-}
-// delete
-extension SQLiteDatabase {
-    func deleteNote (nid: String) throws {
-        let deleteSQL = "DELETE FROM SQLNote WHERE Id = ?;"
-        let deleteStatement = try prepareStatement(sql: deleteSQL)
-        defer {
-            sqlite3_finalize(deleteStatement)
-        }
-        let id = nid as NSString
-        guard
-            sqlite3_bind_text(deleteStatement, 1, id.utf8String, -1, nil) == SQLITE_OK
-        else {
-            throw SQLiteError.bind(message: errorMessage)
-        }
-        guard sqlite3_step(deleteStatement) == SQLITE_DONE else {
-            throw SQLiteError.step(message: errorMessage)
-        }
-        print("Successfully delete row.")
     }
 }
 // count

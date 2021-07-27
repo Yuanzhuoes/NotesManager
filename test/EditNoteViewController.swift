@@ -8,75 +8,120 @@ import UIKit
 import CryptoSwift
 
 class EditNoteViewController: UIViewController {
-    let contentView = UIView()
-    let scrollView = UIScrollView()
+    private let contentView = UIView()
+    private let scrollView = UIScrollView()
+    private let tagLayOut = TagFlowLayout()
+    private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: tagLayOut)
+    private let saveButton = UIButton(type: .system)
+    private let statusLabel = UILabel()
+    private var statusSegment = UISegmentedControl()
+    private let labelLine = UIView()
+    private let contentLine = UIView()
+    private let screenFrame = UIScreen.main.bounds
     let textLabelView = TextViewWithPlacehodler(holder: "请输入标签，示例：标签/标签")
     let textContenView = TextViewWithPlacehodler(holder: "请输入搜记内容")
-    let tagLayOut = TagFlowLayout()
-    lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: tagLayOut)
-    let saveButton = UIButton(type: .system)
-    let statusLabel = UILabel()
-    var statusSegment = UISegmentedControl()
-    let labelLine = UIView()
-    let contentLine = UIView()
-    let screenFrame = UIScreen.main.bounds
     var noteLabelArray = [String]()
     var onSave: (() -> Void)?
     var nid: String = ""
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
-        myConstrain()
+        setConstrain()
     }
-    func setUI() {
+
+    func prepareNote(title: String, content: String, status: Int, nid: String? = nil) -> UserInfo {
+        let localUpdatedAt = getDateIS08601()
+        let checksum = (title + content).crc32()
+        let status = status == 1 ? true : false
+        let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
+        let myNote = UserInfo.Note(title: title,
+                                   content: content,
+                                   status: status,
+                                   checksum: checksum,
+                                   localUpdatedAt: localUpdatedAt)
+        let userInfo = UserInfo(authorization: jwt, nid: nid, note: myNote)
+        return userInfo
+    }
+}
+
+extension EditNoteViewController {
+
+    func setNavigationBar() {
         self.view.backgroundColor = UIColor.white
-        // 导航栏设置
-        // 不透明，view.top下移
-        self.navigationController?.navigationBar.isTranslucent = false
-        self.navigationController?.navigationBar.barTintColor = MyColor.navigationColor
         // 右导航按钮
         saveButton.setTitle("保存", for: .normal)
         saveButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        saveButton.tintColor = MyColor.grayColor
-        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: saveButton)
-        saveButton.isEnabled = false // 放在加入右导航前面会无效
+        saveButton.tintColor = UIColor.grayColor
         saveButton.addTarget(self, action: #selector(saveNote), for: .touchUpInside)
+        self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: saveButton)
+        self.navigationController?.navigationBar.isTranslucent = false
+        self.navigationController?.navigationBar.barTintColor = UIColor.navigationColor
+        saveButton.isEnabled = false // 放在加入右导航前面会无效
+    }
+
+    func setStatusLabel() {
         // 状态标签
         statusLabel.text = "状态"
         statusLabel.font = UIFont.systemFont(ofSize: 15)
-        statusLabel.textColor = MyColor.grayColor
+        statusLabel.textColor = UIColor.grayColor
+    }
+
+    func setStatusSegment() {
         // 状态选择
         statusSegment = UISegmentedControl(items: ["私有", "公开"])
-        statusSegment.backgroundColor = MyColor.segmentColor
-        statusSegment.selectedSegmentTintColor = MyColor.greenColor
-        statusSegment.setTitleTextAttributes([.foregroundColor: MyColor.grayColor], for: .normal)
+        statusSegment.backgroundColor = UIColor.segmentColor
+        statusSegment.selectedSegmentTintColor = UIColor.greenColor
+        statusSegment.setTitleTextAttributes([.foregroundColor: UIColor.grayColor], for: .normal)
         statusSegment.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
         statusSegment.selectedSegmentIndex = 0
         statusSegment.addTarget(self, action: #selector(activeSaveButton), for: .valueChanged)
-//        statusSegment.selectedSegmentIndex = 0
-        // scroll view
-        // display area
+        // statusSegment.selectedSegmentIndex = 0
+    }
+
+    func setScrollView() {
+        // scroll view, display area
         scrollView.frame = screenFrame
         scrollView.showsVerticalScrollIndicator = false
-        // contentview
+    }
+
+    func setTextLabelView() {
         // textLabelView
         textLabelView.font = UIFont.systemFont(ofSize: 15)
         textLabelView.isScrollEnabled = false
-        textLabelView.textColor = MyColor.textColor
-        textLabelView.tintColor = MyColor.greenColor
-        // Line
-        labelLine.backgroundColor = MyColor.grayColor
-        contentLine.backgroundColor = MyColor.grayColor
-        // collectionView
+        textLabelView.textColor = UIColor.textColor
+        textLabelView.tintColor = UIColor.greenColor
+    }
+
+    func setTextContentView() {
+        // textContentView
+        textContenView.font = UIFont.systemFont(ofSize: 15)
+        textContenView.textColor = UIColor.textColor
+        textContenView.tintColor = UIColor.greenColor
+    }
+
+    func setCollectionView() {
         collectionView.backgroundColor = UIColor.white
         collectionView.register(MyCollectionViewCell.self,
                                 forCellWithReuseIdentifier:
                                 MyCollectionViewCell.description())
         collectionView.isScrollEnabled = false
-        // textContentView
-        textContenView.font = UIFont.systemFont(ofSize: 15)
-        textContenView.textColor = MyColor.textColor
-        textContenView.tintColor = MyColor.greenColor
+    }
+
+    func setLine() {
+        labelLine.backgroundColor = UIColor.grayColor
+        contentLine.backgroundColor = UIColor.grayColor
+    }
+
+    func setUI() {
+        setNavigationBar()
+        setScrollView()
+        setStatusLabel()
+        setStatusSegment()
+        setLine()
+        setCollectionView()
+        setTextContentView()
+        setTextLabelView()
         self.view.addSubview(scrollView)
         scrollView.addSubview(contentView)
         contentView.addSubview(statusLabel)
@@ -93,7 +138,8 @@ class EditNoteViewController: UIViewController {
         tagLayOut.delegate = self
         collectionView.dataSource = self
     }
-    func myConstrain() {
+
+    func setConstrain() {
         contentView.snp.makeConstraints {
             // edge
             $0.edges.equalToSuperview()
@@ -135,19 +181,9 @@ class EditNoteViewController: UIViewController {
             $0.bottom.equalTo(0)
         }
     }
-    func prepareNote(title: String, content: String, status: Int, nid: String? = nil) -> UserInfo {
-        let localUpdatedAt = getDateIS08601()
-        let checksum = (title + content).crc32()
-        let status = status == 1 ? true : false
-        let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
-        let myNote = UserInfo.Note(title: title,
-                                   content: content,
-                                   status: status,
-                                   checksum: checksum,
-                                   localUpdatedAt: localUpdatedAt)
-        let userInfo = UserInfo(authorization: jwt, nid: nid, note: myNote)
-        return userInfo
-    }
+}
+
+extension EditNoteViewController {
     @objc func saveNote() {
         if nid.count == 0 { // 保存
             let userInfo = prepareNote(title: textLabelView.text,
@@ -223,11 +259,13 @@ class EditNoteViewController: UIViewController {
             }
         }
     }
+
     @objc func activeSaveButton() {
         saveButton.isEnabled = true
-        saveButton.tintColor = MyColor.greenColor
+        saveButton.tintColor = UIColor.greenColor
     }
 }
+
 extension EditNoteViewController: UICollectionViewDataSource {
     // cell个数
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
@@ -284,6 +322,7 @@ extension EditNoteViewController: UICollectionViewDelegateFlowLayout,
         }
     }
 }
+
 extension EditNoteViewController: UITextViewDelegate {
     // placeholder+字符串分割+更新数据
     func textViewDidChange(_ textView: UITextView) {
@@ -300,13 +339,14 @@ extension EditNoteViewController: UITextViewDelegate {
         // 激活保存按钮
         if textContenView.placeholder.isHidden && textLabelView.placeholder.isHidden {
             saveButton.isEnabled = true
-            saveButton.tintColor = MyColor.greenColor
+            saveButton.tintColor = UIColor.greenColor
         } else {
             saveButton.isEnabled = false
-            saveButton.tintColor = MyColor.grayColor
+            saveButton.tintColor = UIColor.grayColor
         }
         // 限制输入大小？
     }
+
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView == textContenView {
             // 滑动到指定位置

@@ -8,21 +8,23 @@
 import UIKit
 
 class DisplayViewController: UIViewController {
-    let editButton = UIButton(type: .custom)
-    let logOutButton = UIButton(type: .system)
-    let bigEditButton = UIButton(type: .system)
-    let tableView = UITableView()
-    let editImageView = UIImageView()
-    let editLabel = UILabel()
-    let searchController = UISearchController()
-    var searchResults = [SQLNote]()
-    var pendingRequestWorkItem: DispatchWorkItem?
+    private let editButton = UIButton(type: .custom)
+    private let logOutButton = UIButton(type: .system)
+    private let bigEditButton = UIButton(type: .system)
+    private let tableView = UITableView()
+    private let editImageView = UIImageView()
+    private let editLabel = UILabel()
+    private let searchController = UISearchController()
+    private var searchResults = [SQLNote]()
+    private var pendingRequestWorkItem: DispatchWorkItem?
+
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         setUI()
         setConstraints()
     }
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         loadData { [weak self] in
@@ -32,43 +34,34 @@ class DisplayViewController: UIViewController {
             }
         }
     }
-    func setUI () {
+}
+
+extension DisplayViewController {
+    func setNavigationBar() {
         self.view.backgroundColor = UIColor.white
         // 导航栏设置
         self.title = ""
         // 不透明，view.top下移
         self.navigationController?.navigationBar.isTranslucent = false
-        self.navigationController?.navigationBar.barTintColor = MyColor.navigationColor
-        // 左导航按钮
-        logOutButton.setTitle("退出登录", for: .normal)
-        logOutButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
-        logOutButton.tintColor = MyColor.logOutColor
-        logOutButton.addTarget(self, action: #selector(showBubble), for: .touchUpInside)
+        self.navigationController?.navigationBar.barTintColor = UIColor.navigationColor
         self.navigationItem.leftBarButtonItem = UIBarButtonItem(customView: logOutButton)
-        // 右导航按钮
-        editButton.setImage(UIImage(named: "Edit")?.withTintColor(MyColor.greenColor, renderingMode: .automatic), for: .normal)
-        editButton.addTarget(self, action: #selector(createNotes), for: .touchUpInside)
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: editButton)
-        // 编辑按钮
-        editImageView.image = UIImage(named: "Edit")?.withTintColor(MyColor.grayColor, renderingMode: .automatic)
-        editLabel.text = "去创建你的第一个笔记吧 >"
-        editLabel.font = UIFont.systemFont(ofSize: 12)
-        editLabel.textColor = MyColor.grayColor
-        // 编辑按钮的响应
-        bigEditButton.addTarget(self, action: #selector(createNotes), for: .touchUpInside)
-//         搜索框 点击搜索框 隐藏导航栏 整体上移 图标居右 进入搜索页面
+    }
+
+    func setSearchBar() {
+        // 搜索框 点击搜索框 隐藏导航栏 整体上移 图标居右 进入搜索页面
         let searchBar = searchController.searchBar
         searchBar.placeholder = "搜索"
         searchBar.isTranslucent = false
         searchBar.backgroundImage = UIImage()
         searchBar.searchTextField.borderStyle = .none
         searchBar.searchTextField.backgroundColor = UIColor.white
-        searchBar.barTintColor = MyColor.navigationColor
-        searchBar.tintColor = MyColor.greenColor
+        searchBar.barTintColor = UIColor.navigationColor
+        searchBar.tintColor = UIColor.greenColor
         searchBar.searchTextField.clearButtonMode = .never
         // 全局修改
         UITextField.appearance(whenContainedInInstancesOf: [UISearchBar.self])
-            .defaultTextAttributes = [NSAttributedString.Key.foregroundColor: MyColor.textColor]
+            .defaultTextAttributes = [NSAttributedString.Key.foregroundColor: UIColor.textColor]
         UIBarButtonItem.appearance(whenContainedInInstancesOf: [UISearchBar.self]).title = "取消"
         // 搜索控制器设置
         navigationItem.hidesSearchBarWhenScrolling = false
@@ -76,6 +69,26 @@ class DisplayViewController: UIViewController {
         searchController.hidesNavigationBarDuringPresentation = true // 点击搜索栏隐藏导航栏
         searchController.obscuresBackgroundDuringPresentation = false // 展示结果时不变暗
         searchController.searchResultsUpdater = self
+    }
+
+    func setButton() {
+        logOutButton.setTitle("退出登录", for: .normal)
+        logOutButton.titleLabel?.font = UIFont.systemFont(ofSize: 16)
+        logOutButton.tintColor = UIColor.logOutColor
+        // 右导航按钮
+        editButton.setImage(UIImage(named: "Edit")?.withTintColor(UIColor.greenColor, renderingMode: .automatic), for: .normal)
+        logOutButton.addTarget(self, action: #selector(showBubble), for: .touchUpInside)
+        editButton.addTarget(self, action: #selector(createNotes), for: .touchUpInside)
+        // 编辑按钮
+        editImageView.image = UIImage(named: "Edit")?.withTintColor(UIColor.grayColor, renderingMode: .automatic)
+        editLabel.text = "去创建你的第一个笔记吧 >"
+        editLabel.font = UIFont.systemFont(ofSize: 12)
+        editLabel.textColor = UIColor.grayColor
+        // 编辑按钮的响应
+        bigEditButton.addTarget(self, action: #selector(createNotes), for: .touchUpInside)
+    }
+
+    func setTabelView() {
         // 表格设置
         // 左右边距
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -84,12 +97,21 @@ class DisplayViewController: UIViewController {
         tableView.tableFooterView = UIView()
         tableView.dataSource = self
         tableView.delegate = self
+    }
+
+    func setUI () {
+        // 左导航按钮
+        setNavigationBar()
+        setButton()
+        setSearchBar()
+        setTabelView()
         // 添加顺序影响显示效果?
         self.view.addSubview(tableView)
         self.view.addSubview(bigEditButton)
         bigEditButton.addSubview(editImageView)
         bigEditButton.addSubview(editLabel)
     }
+
     func setConstraints() {
         editButton.snp.makeConstraints {
             $0.width.height.equalTo(16)
@@ -114,6 +136,9 @@ class DisplayViewController: UIViewController {
             $0.top.equalToSuperview()
         }
     }
+}
+
+extension DisplayViewController {
     @objc func showBubble() {
         let bubble = MyAlertController(title: "", message: "确定要退出登陆吗？", preferredStyle: .alert)
         let yes = UIAlertAction(title: "确定", style: .default) { _ in
@@ -142,6 +167,7 @@ class DisplayViewController: UIViewController {
             })
         }
     }
+
     @objc func createNotes() {
         // 转入创建笔记页面 不传id 新建笔记
         let viewController = EditNoteViewController()
@@ -233,7 +259,7 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
                 // 需要返回true，否则没有反应
                 completionHandler(true)
             }
-            deleteAction.backgroundColor = MyColor.deleteColor
+            deleteAction.backgroundColor = UIColor.deleteColor
             let config = UISwipeActionsConfiguration(actions: [deleteAction])
             // 取消拉太长后自动删除
             config.performsFirstActionWithFullSwipe = false
@@ -281,6 +307,7 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
         searchController.isActive = false
     }
 }
+
 extension DisplayViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
         pendingRequestWorkItem?.cancel()
@@ -322,6 +349,7 @@ extension DisplayViewController: UISearchResultsUpdating {
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300), execute: requestWorkItem)
     }
 }
+
 extension DisplayViewController: UISearchControllerDelegate {
     func willPresentSearchController(_ searchController: UISearchController) {
     }

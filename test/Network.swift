@@ -24,6 +24,7 @@ extension URL {
         case delete(String) // 关联值
         case update(String)
     }
+
     static func make(scheme: Scheme = .https, host: Host = .main, path: Path) -> URL? {
         var comps = URLComponents()
         comps.scheme = scheme.rawValue
@@ -100,26 +101,11 @@ struct ServerDescription: Codable {
         case content = "content", isPublic = "is_public", checksum = "checksum"
         case isFavorited = "is_favorited", localUpdatedAt = "local_updated_at", author = "author"
     }
- }
-struct SearchItem {
-    struct Author {
-        let id: String
-        let meimoId: String
-        let name: String
-    }
-    let id: String
-    let title: String
-    let tags: [String]
-    let content: String
-    let isPublic: Bool
-    let checksum: String
-    let isFavorited: Bool
-    let localUpdatedAt: String
-    let author: Author
 }
+
 // 接口属性，枚举
 enum Function {
-    case login, logout, getAllNotes, createNotes, delete, updateNotes, getNoteWithID, search
+    case login, logout, getAllNotes, createNotes, delete, updateNotes, search
 }
 // 请求参数 除了登录以外，其他的请求都需要在headers里面加上Authorization字段
 // 用可选是因为不是所有的信息都有，设默认值也不方便
@@ -137,11 +123,13 @@ struct UserInfo {
     var nid: String?
     var note: Note?
 }
+
 func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                         method: HTTPMethod, searchText: String? = nil,
                         completion: @escaping (_: ServerDescription) -> Void) {
     var parameters: [String: Any]? // Any可以表示可选类型 所以可以不写问号, parameters可以没有 默认为nil
     var headers: HTTPHeaders?
+    // JSONEncoding and URLEncoding are both the Parameter type, JSON encodes body, URL encods url
     var encoding: ParameterEncoding = JSONEncoding.default
     let url: URL?
     if userInfo?.authorization != nil {
@@ -169,10 +157,6 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
             return
         }
         url = URL.make(path: .delete(nid))
-    case .getNoteWithID:
-        url = URL.make(path: .notes)
-        parameters = ["identity": userInfo?.email as Any,
-                      "password": userInfo?.pwd as Any]
     case .updateNotes: // patch
         guard let nid = userInfo?.nid else {
             print("nid is nil")
@@ -186,7 +170,6 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                       "local_updated_at": userInfo?.note?.localUpdatedAt as Any]
     case .search: // get
         url = URL.make(path: .notes)
-        // parameters = ["search": searchText as Any]
         guard let searchText = searchText else {
             return
         }
