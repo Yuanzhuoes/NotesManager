@@ -202,7 +202,6 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
                 }
                 // 获取最大高度和行数
                 if i == attributes.count - 1 {
-                    print(curAttr.frame.maxY)
                     self.delegate?.getCollectionViewHeight(height: curAttr.frame.maxY)
                 }
             }

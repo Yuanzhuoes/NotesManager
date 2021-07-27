@@ -244,6 +244,7 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
     // 选择单元格
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         // 进入我的搜记页面
+        // if else?
         guard let myNote = notes?[indexPath.row] else {
             return
         }
@@ -266,11 +267,12 @@ extension DisplayViewController: UISearchResultsUpdating {
                                function: .search,
                                method: .get,
                                searchText: searchController.searchBar.text) { [self] serverDescription in
-                if serverDescription.pagination?.total == 0 {
-                    // 无搜索结果
-                    searchResults = []
+                // 如果没有搜索结果 或者 没有输入，清空缓存，reload data
+                if serverDescription.pagination?.total == 0 || searchController.searchBar.searchTextField.text == "" {
+                    searchResults.removeAll()
                 } else {
                     guard let items = serverDescription.items else {
+                        print("items is nil, but couldn't be")
                         return
                     }
                     searchResults.removeAll()
