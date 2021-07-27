@@ -173,7 +173,6 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
             return count
         }
     }
-
     // 初始化和复用单元格
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier:
@@ -259,9 +258,9 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
 }
 extension DisplayViewController: UISearchResultsUpdating {
     func updateSearchResults(for searchController: UISearchController) {
+        pendingRequestWorkItem?.cancel()
         let jwt = userDefault.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
         let userInfo = UserInfo(authorization: jwt)
-        pendingRequestWorkItem?.cancel()
         let requestWorkItem = DispatchWorkItem { [self] in
             requestAndResponse(userInfo: userInfo,
                                function: .search,
@@ -269,6 +268,7 @@ extension DisplayViewController: UISearchResultsUpdating {
                                searchText: searchController.searchBar.text) { [self] serverDescription in
                 if serverDescription.pagination?.total == 0 {
                     // 无搜索结果
+                    searchResults = []
                 } else {
                     guard let items = serverDescription.items else {
                         return
@@ -284,8 +284,13 @@ extension DisplayViewController: UISearchResultsUpdating {
                         searchResults.append(SQLNote(id: id, tag: tag, content: content, status: status))
                     }
                 }
+                loadData { [weak self] in
+                    self?.tableView.reloadData()
+                    DispatchQueue.main.async {
+                        self?.tableView.reloadData()
+                    }
+                }
             }
-            tableView.reloadData()
         }
         pendingRequestWorkItem = requestWorkItem
         DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(300), execute: requestWorkItem)
