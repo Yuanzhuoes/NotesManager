@@ -21,13 +21,13 @@ class LoginViewController: UIViewController {
         // 父类初始化
         super.viewDidLoad()
         try? DBManager.db?.createTable(table: SQLNote.self)
-        myUI()
-        myConstraints()
+        setUI()
+        setConstraints()
         // 测试
         textName.text = "fffgrdcc@163.com"
         textPassWord.text = "123456"
     }
-    func myUI() {
+    func setUI() {
         // 导航控制器设置
         self.view.backgroundColor = UIColor.white
         // 当前页和返回页字符不显示
@@ -112,7 +112,7 @@ class LoginViewController: UIViewController {
         errorLabel.isHidden = true
         self.view.addSubview(errorLabel)
     }
-    func myConstraints() {
+    func setConstraints() {
         // 约束：以线性方程式的解来确定两个矩形之间的距离关系。 distance(x1, x2) = x2 * a + c
         loginView.snp.makeConstraints {
             $0.width.equalTo(192)

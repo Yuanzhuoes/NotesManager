@@ -20,8 +20,8 @@ class DisplayViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
-        myUI()
-        myConstraints()
+        setUI()
+        setConstraints()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -32,7 +32,7 @@ class DisplayViewController: UIViewController {
             }
         }
     }
-    func myUI () {
+    func setUI () {
         self.view.backgroundColor = UIColor.white
         // 导航栏设置
         self.title = ""
@@ -90,7 +90,7 @@ class DisplayViewController: UIViewController {
         bigEditButton.addSubview(editImageView)
         bigEditButton.addSubview(editLabel)
     }
-    func myConstraints() {
+    func setConstraints() {
         editButton.snp.makeConstraints {
             $0.width.height.equalTo(16)
         }
@@ -143,14 +143,15 @@ class DisplayViewController: UIViewController {
         }
     }
     @objc func createNotes() {
-        // 转入创建笔记页面
-        let viewController = CreateNoteViewController()
+        // 转入创建笔记页面 不传id 新建笔记
+        let viewController = EditNoteViewController()
         viewController.onSave = { [weak self] in
             self?.tableView.reloadData()
             DispatchQueue.main.async {
                 self?.tableView.reloadData()
             }
         }
+        viewController.title = "新建笔记"
         self.navigationController?.pushViewController(viewController, animated: true)
     }
 }
@@ -158,7 +159,7 @@ class DisplayViewController: UIViewController {
 extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
     // 单元格行数 系统默认为1
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // 如果没有数据 显示创建按钮
+        // 如果搜索栏激活，数据源用searchResults, 并且隐藏编辑标签
         if searchController.isActive {
             return searchResults.count
         } else {
@@ -243,18 +244,41 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
     }
     // 选择单元格
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // 进入我的搜记页面
-        // if else?
-        guard let myNote = notes?[indexPath.row] else {
-            return
+        // 进入笔记显示页面
+        let viewController = EditNoteViewController()
+        if searchController.isActive {
+            let searchNote = searchResults[indexPath.row]
+            let myNote = try? DBManager.db?.queryNote(nid: searchNote.id)
+            // 判断笔记是不是我的
+            if let myNote = myNote {
+                viewController.textLabelView.text = myNote.tag
+                viewController.noteLabelArray = myNote.tag.array
+                viewController.textContenView.text = myNote.content
+                viewController.nid = myNote.id
+                print(viewController.nid)
+                viewController.title = "我的搜记"
+            // 不是则只显示不能编辑
+            } else {
+                viewController.textLabelView.text = searchNote.tag
+                viewController.noteLabelArray = searchNote.tag.array
+                viewController.textContenView.text = searchNote.content
+                viewController.title = "搜记"
+            }
+        // 进入我的搜记页面 传nid更新
+        } else {
+            guard let myNote = notes?[indexPath.row] else {
+                return
+            }
+            viewController.textLabelView.text = myNote.tag
+            viewController.noteLabelArray = myNote.tag.array
+            viewController.textContenView.text = myNote.content
+            viewController.nid = myNote.id
+            viewController.title = "我的搜记"
+            // 状态标签怎么传
         }
-        let viewController = UpdataNoteViewController()
-        viewController.textLabelView.text = myNote.tag
-        viewController.noteLabelArray = myNote.tag.array
-        viewController.textContenView.text = myNote.content
-        viewController.nid = myNote.id
-        // 状态标签怎么传
         self.navigationController?.pushViewController(viewController, animated: true)
+        // 点击搜索列表并且跳转后禁用searchBar, 写在这里动画是最流畅的
+        searchController.isActive = false
     }
 }
 extension DisplayViewController: UISearchResultsUpdating {
@@ -272,7 +296,7 @@ extension DisplayViewController: UISearchResultsUpdating {
                     searchResults.removeAll()
                 } else {
                     guard let items = serverDescription.items else {
-                        print("items is nil, but couldn't be")
+                        print("items is nil, but souldn't to be")
                         return
                     }
                     searchResults.removeAll()
@@ -299,6 +323,14 @@ extension DisplayViewController: UISearchResultsUpdating {
     }
 }
 extension DisplayViewController: UISearchControllerDelegate {
+    func willPresentSearchController(_ searchController: UISearchController) {
+    }
+    func didPresentSearchController(_ searchController: UISearchController) {
+    }
+    func didDismissSearchController(_ searchController: UISearchController) {
+    }
+    func willDismissSearchController(_ searchController: UISearchController) {
+    }
 }
 // MARK: -
 extension DisplayViewController {

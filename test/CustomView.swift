@@ -222,13 +222,13 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
     var noteLabelArray: [String] = []
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
-        myAdd()
-        myConstraints()
+        setUI()
+        setConstraints()
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    func myAdd() {
+    func setUI() {
 //         collection view
         collectionView.backgroundColor = UIColor.white
         collectionView.register(MyCollectionViewCell.self, forCellWithReuseIdentifier: MyCollectionViewCell.description())
@@ -254,7 +254,7 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
         collectionView.dataSource = self
         tagLayOut.delegate = self
     }
-    func myConstraints() {
+    func setConstraints() {
         privateLabel.snp.makeConstraints {
             $0.width.height.equalTo(18)
             $0.top.equalToSuperview().offset(12)
