@@ -6,14 +6,14 @@
 //
 
 import UIKit
-// 自定义MyCollectionViewCell
+// custom collectionViewCell
 class MyCollectionViewCell: UICollectionViewCell {
     let noteLabel = UILabel()
     let view = UIView()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        // 笔记标签 默认单行
+        // notelable, single line default
         noteLabel.font = UIFont.systemFont(ofSize: 11)
         noteLabel.textAlignment = .center
         noteLabel.textColor = UIColor.textColor
@@ -29,11 +29,10 @@ class MyCollectionViewCell: UICollectionViewCell {
     override func layoutSubviews() {
         super.layoutSubviews()
         view.snp.makeConstraints { make in
-            // 距离content的约束 0相当于填满整个父视图
+            // zero?
             make.left.right.top.bottom.equalTo(0)
         }
         noteLabel.snp.makeConstraints { make in
-            // 距离view的约束
             make.left.top.right.bottom.equalTo(0)
         }
     }

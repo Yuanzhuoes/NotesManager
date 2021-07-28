@@ -6,6 +6,7 @@
 //
 import Foundation
 import Alamofire
+
 // url
 extension URL {
     enum Scheme: String {
@@ -21,7 +22,7 @@ extension URL {
         case logout
         case notes
         case createNote
-        case delete(String) // 关联值
+        case delete(String) // associated values
         case update(String)
     }
 
@@ -51,7 +52,8 @@ extension URL {
         print("\(String(describing: url))")
     }
 }
-// 解析JSON
+
+// JSON decoder model
 struct ServerDescription: Codable {
     struct Author: Codable {
         let id: String?
@@ -74,6 +76,7 @@ struct ServerDescription: Codable {
         let localUpdatedAt: String?
         let author: Author?
     }
+
     let author: Author?
     let pagination: Pagination?
     let remoteNotes: [Items]?
@@ -82,7 +85,7 @@ struct ServerDescription: Codable {
     let error: Int?
     let message: String?
     let id: String?
-    let maimemoId: Double? // int?
+    let maimemoId: Double?
     let email: String?
     let name: String?
     let jwt: String?
@@ -93,22 +96,34 @@ struct ServerDescription: Codable {
     let checksum: String?
     let isFavorited: Bool?
     let localUpdatedAt: String?
+
     private enum CodingKeys: String, CodingKey {
-        case error = "error", id = "id", maimemoId = "maimemo_id"
-        case email = "email", name = "name", jwt = "jwt", message = "message"
-        case pagination = "pagination", items = "items", remoteNotes = "remote_notes"
-        case remoteNotesConflict = "remote_notes_conflict", title = "title", tags = "tags"
-        case content = "content", isPublic = "is_public", checksum = "checksum"
-        case isFavorited = "is_favorited", localUpdatedAt = "local_updated_at", author = "author"
+        case error = "error"
+        case id = "id"
+        case maimemoId = "maimemo_id"
+        case email = "email"
+        case name = "name", jwt = "jwt"
+        case message = "message"
+        case pagination = "pagination"
+        case items = "items"
+        case remoteNotes = "remote_notes"
+        case remoteNotesConflict = "remote_notes_conflict"
+        case title = "title"
+        case tags = "tags"
+        case content = "content"
+        case isPublic = "is_public"
+        case checksum = "checksum"
+        case isFavorited = "is_favorited"
+        case localUpdatedAt = "local_updated_at"
+        case author = "author"
     }
 }
 
-// 接口属性，枚举
 enum Function {
     case login, logout, getAllNotes, createNotes, delete, updateNotes, search
 }
-// 请求参数 除了登录以外，其他的请求都需要在headers里面加上Authorization字段
-// 用可选是因为不是所有的信息都有，设默认值也不方便
+
+// request parameters
 struct UserInfo {
     struct Note {
         var title: String?
@@ -127,7 +142,7 @@ struct UserInfo {
 func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                         method: HTTPMethod, searchText: String? = nil,
                         completion: @escaping (_: ServerDescription) -> Void) {
-    var parameters: [String: Any]? // Any可以表示可选类型 所以可以不写问号, parameters可以没有 默认为nil
+    var parameters: [String: Any]? // Any can be optional
     var headers: HTTPHeaders?
     // JSONEncoding and URLEncoding are both the Parameter type, JSON encodes body, URL encods url
     var encoding: ParameterEncoding = JSONEncoding.default
@@ -135,10 +150,11 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
     if userInfo?.authorization != nil {
         headers = ["Authorization": "Bearer " + (userInfo?.authorization)!]
     }
+
     switch function {
     case .login: // post
         url = URL.make(path: .login)
-        parameters = ["identity": userInfo?.email as Any, // 用Any承载可选值，需要显示转换，防止报错
+        parameters = ["identity": userInfo?.email as Any, // explicit conversion when Any is optional
                       "password": userInfo?.pwd as Any]
     case .logout: // post
         url = URL.make(path: .logout)
@@ -176,7 +192,7 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
         parameters = ["search": searchText]
         encoding = URLEncoding.default
     }
-    // TODO: optional URL
+
     let urlString = url?.absoluteString
     var request: DataRequest?
     request =
@@ -206,10 +222,4 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                         print(error)
                     }
                    }
-}
-// set default optional value of string to ""
-extension Optional where Wrapped == String {
-    var safe: String {
-       return self ?? ""
-    }
 }

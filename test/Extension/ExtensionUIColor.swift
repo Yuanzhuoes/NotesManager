@@ -6,7 +6,7 @@
 //
 
 import UIKit
-// 十六进制颜色转换 结构体类型属性 用类型名调用
+// hex color to UIColor
 extension UIColor {
     static let placeHolderColor = UIColor(hexColor: "aaaaaa")
     static let eyeColor = UIColor(hexColor: "aaaaaa")
@@ -23,13 +23,14 @@ extension UIColor {
 }
 
 extension UIColor {
-    // 便利构造函数可返回nil
     convenience init(hexColor: String) {
         let hexColor = hexColor.trimmingCharacters(in: .whitespacesAndNewlines)
         let scanner = Scanner(string: hexColor)
+
         if hexColor.hasPrefix("#") {
             scanner.currentIndex = scanner.string.index(after: scanner.currentIndex)
         }
+
         var color: UInt64 = 0
         scanner.scanHexInt64(&color)
 

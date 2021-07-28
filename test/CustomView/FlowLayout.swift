@@ -21,31 +21,34 @@ class TagFlowLayout: UICollectionViewFlowLayout {
 
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         super.layoutAttributesForElements(in: rect)
-        // 系统计算的结果，所有cell布局信息的数组
+        // system info of cell layout
         guard let attributes = super.layoutAttributesForElements(in: rect) else {
             return nil
         }
-        // 水平间距调整
+        // reset horizontal space
         if attributes.count > 0 {
             var row = 1
-            // 第一个标签居左
+            // first label on the left
             attributes[0].frame.origin.x = 0
+
+            // adjust space from the second cell
             for i in 1..<attributes.count {
                 let curAttr = attributes[i]
                 let preAttr = attributes[i - 1]
                 let origin = preAttr.frame.maxX
                 let targetX = origin + maxSpacing
                 let targetY = preAttr.frame.origin.y
-                // 如果一行内还放得下 调整x, 否则换行（系统自动的）居左 (当前item宽度 + 前一个item的最大x坐标 + 间距 <= collectionview的宽度)
+
                 if targetX + curAttr.frame.width <= collectionViewContentSize.width {
                     curAttr.frame.origin.x = targetX
-                    // 为什么不限制y会出错
                     curAttr.frame.origin.y = targetY
+                // else automatically wrap to the next line
                 } else {
                     curAttr.frame.origin.x = 0
                     row += 1
                 }
-                // 获取最大高度和行数
+
+                // get the hight of collection view from the last cell
                 if i == attributes.count - 1 {
                     self.delegate?.getCollectionViewHeightAndRows(height: curAttr.frame.maxY, row: row)
                 }
@@ -54,8 +57,9 @@ class TagFlowLayout: UICollectionViewFlowLayout {
         return attributes
     }
 }
-// 委托/代理 设计模式：将一个类要做的事委托给另一个符合要求的类去做
-// AnyObject 类专属协议
+
+// delegate design pattern
+// AnyObject: class-only protocol
 protocol DisplayTagFlowLayoutDelegate: AnyObject {
     func getCollectionViewHeight(height: CGFloat)
 }
@@ -70,31 +74,26 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
 
     override func layoutAttributesForElements(in rect: CGRect) -> [UICollectionViewLayoutAttributes]? {
         super.layoutAttributesForElements(in: rect)
-        // 系统计算的结果，所有cell布局信息的数组
         guard let attributes = super.layoutAttributesForElements(in: rect) else {
             return nil
         }
-        // 水平间距调整 如果有标签就重新布局 否则默认值
         if attributes.count > 0 {
             var row = 1
-            // 第一个标签居左
             attributes[0].frame.origin.x = 0
-            // 只有一个标签 只记录高度 不调整间距
+
             if attributes.count == 1 {
                 self.delegate?.getCollectionViewHeight(height: attributes[0].frame.maxY)
                 return attributes
             }
-            // 两个标签开始调整间距
+
             for i in 1..<attributes.count {
                 let curAttr = attributes[i]
                 let preAttr = attributes[i - 1]
                 let origin = preAttr.frame.maxX
                 let targetX = origin + maxSpacing
                 let targetY = preAttr.frame.origin.y
-                // 如果一行内还放得下 调整x, 否则换行（系统自动的）居左 (当前item宽度 + 前一个item的最大x坐标 + 间距 <= collectionview的宽度)
                 if targetX + curAttr.frame.width <= collectionViewContentSize.width - 18 && row == 1 {
                     curAttr.frame.origin.x = targetX
-                    // 不限制y会出错 why?
                     curAttr.frame.origin.y = targetY
                 } else if targetX + curAttr.frame.width <= collectionViewContentSize.width && row > 1 {
                     curAttr.frame.origin.x = targetX
@@ -103,7 +102,8 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
                     curAttr.frame.origin.x = 0
                     row += 1
                 }
-                // 获取最大高度和行数
+
+                // get max hight and rows
                 if i == attributes.count - 1 {
                     self.delegate?.getCollectionViewHeight(height: curAttr.frame.maxY)
                 }

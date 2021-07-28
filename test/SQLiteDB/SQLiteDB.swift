@@ -6,8 +6,10 @@
 //
 import Foundation
 import SQLite3
-// 缓存
+
+// global notes buffer
 var notes: [SQLNote]?
+
 // error
 enum SQLiteError: Error {
     case openDatabase(message: String)
@@ -16,16 +18,19 @@ enum SQLiteError: Error {
     case bind(message: String)
     case other(message: String)
 }
+
 // table structures
 struct SQLNote {
     let id: String
-    let tag: String // 可以为空字符串
+    let tag: String // TODO: could be empty
     let content: String
     let status: Int
 }
+
 protocol SQLTable {
     static var createStatement: String { get }
 }
+
 // how to modify the table?
 extension SQLNote: SQLTable {
   static var createStatement: String {
@@ -39,6 +44,7 @@ extension SQLNote: SQLTable {
     """
   }
 }
+
 // my database
 class SQLiteDatabase {
     // swift type of c pointer
@@ -52,12 +58,15 @@ class SQLiteDatabase {
         return "No error message provided from sqlite."
       }
     }
+
     private init(dbPointer: OpaquePointer?) {
         self.dbPointer = dbPointer
     }
+
     deinit {
         sqlite3_close(dbPointer)
     }
+
     // connect and open the database
     static func open(path: String) throws -> SQLiteDatabase {
         var db: OpaquePointer?
@@ -82,27 +91,18 @@ class SQLiteDatabase {
 // singleton
 class DBManager {
     private var db: SQLiteDatabase?
-    // 隐藏单例
+    // hide singleton
     private static let manager = DBManager()
-    // 只暴露指针
+    // expose pointer
     static let db: SQLiteDatabase? = manager.db
+
     private init () {
         let url = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
         let dbPath = (url as NSString).appendingPathComponent("myNote.db")
         db = try? SQLiteDatabase.open(path: dbPath)
     }
 }
-// another singleton
-// class DBManager {
-//    let db: SQLiteDatabase?
-//    static let manager = DBManager()
-//    private init () {
-//        let url = NSSearchPathForDirectoriesInDomains(.documentDirectory, .userDomainMask, true)[0]
-//        let dbPath = (url as NSString).appendingPathComponent("myNote.db")
-//        db = try? SQLiteDatabase.open(path: dbPath)
-//    }
-// }
-// wrap prepare statement
+
 extension SQLiteDatabase {
     func prepareStatement(sql: String) throws -> OpaquePointer? {
         var statement: OpaquePointer?
@@ -112,6 +112,7 @@ extension SQLiteDatabase {
         return statement
     }
 }
+
 // create database
 extension SQLiteDatabase {
     func createTable(table: SQLTable.Type) throws {
@@ -125,6 +126,7 @@ extension SQLiteDatabase {
         print("\(table) table created.")
     }
 }
+
 // insert
 extension SQLiteDatabase {
     func insertNote(myNote: SQLNote) throws {
@@ -151,6 +153,7 @@ extension SQLiteDatabase {
         print("Successfully inserted row.")
     }
 }
+
 // delete
 extension SQLiteDatabase {
     func deleteNote (nid: String) throws {
@@ -171,6 +174,7 @@ extension SQLiteDatabase {
         print("Successfully delete row.")
     }
 }
+
 // update
 extension SQLiteDatabase {
     func updateNote (myNote: SQLNote) throws {
@@ -196,6 +200,7 @@ extension SQLiteDatabase {
         print("Successfully update row.")
     }
 }
+
 // query with nid
 extension SQLiteDatabase {
     func queryNote(nid: String) throws -> SQLNote? {
@@ -235,6 +240,7 @@ extension SQLiteDatabase {
         return SQLNote(id: id, tag: tag, content: content, status: Int(status))
     }
 }
+
 // insert all notes
 extension SQLiteDatabase {
     func insertAllNotesToDB(notes: [ServerDescription.Items]) {
@@ -251,6 +257,7 @@ extension SQLiteDatabase {
         }
     }
 }
+
 // select from offset to limit
 extension SQLiteDatabase {
     func queryAllSQLNotes() throws -> [SQLNote] {
@@ -282,6 +289,7 @@ extension SQLiteDatabase {
         return notesArray
     }
 }
+
 // count
 extension SQLiteDatabase {
     func count () -> Int {

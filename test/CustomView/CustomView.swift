@@ -6,7 +6,8 @@
 //
 
 import UIKit
-// 自定义UITextField
+
+// custom UITextField
 class LineTextField: UITextField {
     override func draw(_ rect: CGRect) {
         let labelLineHeight: CGFloat = 0.5
@@ -18,7 +19,8 @@ class LineTextField: UITextField {
         UIGraphicsBeginImageContextWithOptions(rect.size, true, 0)
     }
 }
-// 自定义UIAlertController KVC运行时访问和修改对象属性
+
+// custom UIAlertController KVC
 class MyAlertController: UIAlertController {
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -27,12 +29,29 @@ class MyAlertController: UIAlertController {
             NSAttributedString.Key.foregroundColor: UIColor.textColor])
         self.setValue(attributedString, forKey: "attributedMessage")
     }
+
     override func addAction(_ action: UIAlertAction ) {
         super.addAction(action)
         self.view.tintColor = UIColor.greenColor
     }
+
+    static func setBubble(title: String,
+                          message: String,
+                          action: Bool,
+                          cancelHander: ((UIAlertAction) -> Void)? = nil,
+                          yesHander: ((UIAlertAction) -> Void)? = nil) -> MyAlertController {
+        let bubble = MyAlertController(title: title, message: message, preferredStyle: .alert)
+        if action {
+            let cancel = UIAlertAction(title: "取消", style: .default, handler: cancelHander)
+            let yes = UIAlertAction(title: "确认", style: .default, handler: yesHander)
+            bubble.addAction(yes)
+            bubble.addAction(cancel)
+        }
+        return bubble
+    }
 }
-// 自定义tableview with placeholder
+
+// tableview with placeholder
 class TextViewWithPlacehodler: UITextView {
     let placeholder = UILabel()
     var holder: String

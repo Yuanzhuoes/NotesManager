@@ -7,10 +7,9 @@
 
 import Foundation
 import UIKit
-// 扩展string
+
 extension String {
-// 富文本设置 行间距 字间距
-    // 按需要可以设置所有的属性 字体 颜色 大小等
+    // arrtibuted string setting: eg. line spacing, breakMode, color, font size
     func attributedString(lineSpaceing: CGFloat, lineBreakModel: NSLineBreakMode) -> NSAttributedString {
         let style = NSMutableParagraphStyle()
         style.lineSpacing = lineSpaceing
@@ -20,20 +19,29 @@ extension String {
         let attrStr = NSMutableAttributedString.init(string: self, attributes: attributes)
         return attrStr
     }
-    // 字符串分割
+
+    // string to array
     var array: [String] {
         let dividedFlag: CharacterSet = NSCharacterSet(charactersIn: "/") as CharacterSet
         return self.components(separatedBy: dividedFlag)
     }
-    // 邮箱格式检测
+
     var isValidateEmail: Bool {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
         let emailTest: NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
         return emailTest.evaluate(with: self)
     }
 }
+
 extension Int {
     var intToString: String {
         return self == 1 ? "公" : "私"
+    }
+}
+
+// set default optional value of string to ""
+extension Optional where Wrapped == String {
+    var safe: String {
+       return self ?? ""
     }
 }
