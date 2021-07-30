@@ -13,6 +13,7 @@ class DisplayView: UIView {
     let tableView = UITableView()
     let editImageView = UIImageView()
     let editLabel = UILabel()
+    let searchResultsLabel = UILabel()
     let searchController = UISearchController()
 
     override init(frame: CGRect) {
@@ -27,6 +28,7 @@ class DisplayView: UIView {
         setButton()
         setSearchBar()
         setTabelView()
+        setLabel()
         setSubview()
         setConstraints()
     }
@@ -63,12 +65,19 @@ class DisplayView: UIView {
         editLabel.textColor = UIColor.grayColor
     }
 
+    func setLabel() {
+        searchResultsLabel.text = "无搜索结果"
+        searchResultsLabel.font = UIFont.systemFont(ofSize: 14)
+        searchResultsLabel.textColor = UIColor.textColor
+        searchResultsLabel.isHidden = SearchResults.hiddenMode
+    }
+
     func setTabelView() {
-        // 表格设置
         // 左右边距
         tableView.separatorInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
         // 去除多余下划线
         tableView.tableFooterView = UIView()
+        tableView.showsVerticalScrollIndicator = false
         tableView.register(MyTableViewCell.self, forCellReuseIdentifier: MyTableViewCell.description())
     }
 
@@ -76,6 +85,7 @@ class DisplayView: UIView {
         // 添加顺序影响显示效果
         self.addSubview(tableView)
         self.addSubview(bigEditButton)
+        self.addSubview(searchResultsLabel)
         bigEditButton.addSubview(editImageView)
         bigEditButton.addSubview(editLabel)
     }
@@ -102,6 +112,10 @@ class DisplayView: UIView {
         tableView.snp.makeConstraints {
             $0.leading.width.height.equalToSuperview()
             $0.top.equalToSuperview()
+        }
+        searchResultsLabel.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(24)
+            $0.centerX.equalToSuperview()
         }
     }
 }

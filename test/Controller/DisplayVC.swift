@@ -33,12 +33,12 @@ class DisplayViewController: UIViewController {
 
 // set tableView
 extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
-    // 单元格行数 系统默认为1
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // 如果搜索栏激活，数据源用searchResults, 并且隐藏编辑标签
+        // change datasource when search bar is active
         if displayView.searchController.isActive {
             displayView.bigEditButton.isHidden = true
-            return searchResults.noteArray.count
+            displayView.searchResultsLabel.isHidden = SearchResults.hiddenMode
+            return SearchResults.noteArray.count
         } else {
             guard let count = notes?.count else {
                 return 0
@@ -52,38 +52,43 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    // 初始化和复用单元格
+    // init tabelview cell
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier:
-                                                MyTableViewCell.description(),
-                                                for: indexPath) as? MyTableViewCell
-        cell?.selectionStyle = .none
-        cell?.layoutIfNeeded()
-        cell?.collectionView.reloadData()
+        // init a not reusable new cell to avoid hight update error?
+        guard let cell = tableView.dequeueReusableCell(withIdentifier:
+                                                        MyTableViewCell.description(),
+                                                        for: indexPath) as? MyTableViewCell
+        else {
+            return MyTableViewCell(style: .default, reuseIdentifier: "cell")
+        }
+        cell.selectionStyle = .none
+
+        cell.layoutIfNeeded()
+        cell.collectionView.reloadData()
 
         if displayView.searchController.isActive {
-            cell?.noteLabelArray = searchResults.noteArray[indexPath.row].tag.array
-            cell?.privateLabel.text = searchResults.noteArray[indexPath.row].status.intToString
-            cell?.contentLabel.attributedText = searchResults.noteArray[indexPath.row].content
+            cell.noteLabelArray = SearchResults.noteArray[indexPath.row].tag.array
+            cell.privateLabel.text = SearchResults.noteArray[indexPath.row].status.intToString
+            cell.contentLabel.attributedText = SearchResults.noteArray[indexPath.row].content
                 .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
         } else {
             if let notesLabelArray = notes?[indexPath.row].tag.array {
-                cell?.noteLabelArray = notesLabelArray
+                cell.noteLabelArray = notesLabelArray
             } else {
-                cell?.noteLabelArray = []
+                cell.noteLabelArray = []
             }
-            cell?.privateLabel.text = notes?[indexPath.row].status.intToString
-            cell?.contentLabel.attributedText = notes?[indexPath.row].content
+            cell.privateLabel.text = notes?[indexPath.row].status.intToString
+            cell.contentLabel.attributedText = notes?[indexPath.row].content
                 .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
         }
 
-        return cell!
+        return cell
     }
 
-    // 左滑删除按钮
+    // delete action
     func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt
                     indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        // 设置气泡
+        // set bubble
         let hander: (UIAlertAction) -> Void = {_ in
             guard let id = notes?[indexPath.row].id else {
                 return
@@ -94,18 +99,17 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
         }
         let bubble = MyAlertController.setBubble(title: "", message: "确定要删除该笔记吗？", action: true, yesHander: hander)
 
-        // 删除
+        // set delete action
         if displayView.searchController.isActive {
             return UISwipeActionsConfiguration()
         } else {
-            // 设置删除动作
             let deleteAction = UIContextualAction(style: .normal, title: "删除") { (_, _, completionHandler) in
                 self.presentBubble(bubble)
                 completionHandler(true)
             }
             deleteAction.backgroundColor = UIColor.deleteColor
 
-            // 返回删除设置
+            // return configure
             let configure = UISwipeActionsConfiguration(actions: [deleteAction])
             configure.performsFirstActionWithFullSwipe = false
 
@@ -113,43 +117,33 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
-    // 选择单元格
+    // select tableview cell
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        // 进入笔记显示页面
         let viewController = EditNoteViewController()
 
         if displayView.searchController.isActive {
-            let searchNote = searchResults.noteArray[indexPath.row]
+            let searchNote = SearchResults.noteArray[indexPath.row]
             let myNote = try? DBManager.db?.queryNote(nid: searchNote.id)
-            // 判断笔记是不是我的
+
             if let myNote = myNote {
-                viewController.editView.textLabelView.text = myNote.tag
-                viewController.editView.textContenView.text = myNote.content
-                viewController.editData.noteLabelArray = myNote.tag.array
-                viewController.editData.nid = myNote.id
-                viewController.title = "我的搜记"
+                configureMyNotePage(viewController: viewController, note: myNote)
             // 不是则只显示不能编辑
             } else {
-                viewController.editView.textLabelView.text = searchNote.tag
-                viewController.editData.noteLabelArray = searchNote.tag.array
-                viewController.editView.textContenView.text = searchNote.content
-                viewController.title = "搜记"
+                let viewController = SearchViewController()
+                configureOthersSearchNotePage(viewController: viewController, note: searchNote)
+                self.navigationController?.pushViewController(viewController, animated: false)
+                displayView.searchController.isActive = false
+                return
             }
-        // 进入我的搜记页面 传nid更新
+        // update
         } else {
             guard let myNote = notes?[indexPath.row] else {
                 return
             }
-            viewController.editView.textLabelView.text = myNote.tag
-            viewController.editData.noteLabelArray = myNote.tag.array
-            viewController.editView.textContenView.text = myNote.content
-            viewController.editData.nid = myNote.id
-            viewController.title = "我的搜记"
-            // 状态标签怎么传
+            configureMyNotePage(viewController: viewController, note: myNote)
         }
 
-        self.navigationController?.pushViewController(viewController, animated: true)
-        // 点击搜索列表并且跳转后禁用searchBar, 写在这里动画是最流畅的
+        self.navigationController?.pushViewController(viewController, animated: false)
         displayView.searchController.isActive = false
     }
 }
@@ -166,23 +160,27 @@ extension DisplayViewController: UISearchResultsUpdating {
                                function: .search,
                                method: .get,
                                searchText: searchController.searchBar.text) { [self] serverDescription in
+                // 如果没有搜索结果 显示标签 否则 隐藏
+                SearchResults.hiddenMode = serverDescription.pagination?.total == 0 ? false : true
                 // 如果没有搜索结果 或者 没有输入，清空缓存，reload data
                 if serverDescription.pagination?.total == 0 || searchController.searchBar.searchTextField.text == "" {
-                    searchResults.noteArray.removeAll()
+                    SearchResults.noteArray.removeAll()
                 } else {
+                    SearchResults.noteArray.removeAll()
                     guard let items = serverDescription.items else {
                         print("items is nil, but souldn't to be")
                         return
                     }
-                    searchResults.noteArray.removeAll()
                     for item in items {
                         guard let id = item.id, let tag = item.title, let content = item.content else {
                             return
                         }
+                        // search results of isPublic are always nil ?
                         guard let status = (item.isPublic == true) ? 1 : 0 else {
                             return
                         }
-                        searchResults.noteArray.append(SQLNote(id: id, tag: tag, content: content, status: status))
+                        SearchResults.noteArray.append(SQLNote(id: id, tag: tag, content: content, status: status))
+                        // 将搜索关键字放在最前面
                     }
                 }
                 loadData { [weak self] in
@@ -216,7 +214,7 @@ private extension DisplayViewController {
         self.navigationItem.rightBarButtonItem = UIBarButtonItem(customView: displayView.editButton)
         // set searchbar
         navigationItem.hidesSearchBarWhenScrolling = false
-        navigationItem.searchController =  displayView.searchController
+        navigationItem.searchController = displayView.searchController
     }
 
     func setConstrains() {
@@ -236,7 +234,6 @@ private extension DisplayViewController {
         displayView.tableView.delegate = self
         displayView.searchController.searchResultsUpdater = self
     }
-
 }
 
 // UI response
@@ -252,6 +249,7 @@ private extension DisplayViewController {
     }
 
     func presentEditPage() {
+        EditData.noteLabelArray = []
         let viewController = EditNoteViewController()
         viewController.onSave = { [weak self] in
             self?.displayView.tableView.reloadData()
@@ -260,7 +258,22 @@ private extension DisplayViewController {
             }
         }
         viewController.title = "新建笔记"
-        self.navigationController?.pushViewController(viewController, animated: true)
+        self.navigationController?.pushViewController(viewController, animated: false)
+    }
+
+    func configureMyNotePage(viewController: EditNoteViewController, note: SQLNote) {
+        viewController.editView.textLabelView.text = note.tag
+        viewController.editView.textContenView.text = note.content
+        EditData.noteLabelArray = note.tag.array
+        EditData.nid = note.id
+        EditData.segmentIndex = note.status
+        viewController.title = "我的搜记"
+    }
+
+    func configureOthersSearchNotePage(viewController: SearchViewController, note: SQLNote) {
+        SearchData.noteLabelArray = note.tag.array
+        viewController.searchView.textContenView.text = note.content
+        viewController.title = "搜记"
     }
 }
 

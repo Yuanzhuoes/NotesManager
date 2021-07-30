@@ -9,14 +9,13 @@ import CryptoSwift
 
 class EditNoteViewController: UIViewController {
     let editView = EditView()
-    var editData = EditData()
     var onSave: (() -> Void)?
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setUI()
-        addTarget()
         setDelegate()
+        addTarget()
     }
 }
 
@@ -24,10 +23,7 @@ class EditNoteViewController: UIViewController {
 extension EditNoteViewController: UICollectionViewDataSource {
     // cell numbers
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if editData.noteLabelArray.count == 1 && editData.noteLabelArray[0] == "" {
-            return 0
-        }
-        return editData.noteLabelArray.count
+        return EditData.noteLabelArray.count
     }
 
     // cell content
@@ -35,19 +31,18 @@ extension EditNoteViewController: UICollectionViewDataSource {
         let cell = collectionView
             .dequeueReusableCell(withReuseIdentifier: MyCollectionViewCell.description(), for: indexPath)
         if let cell = cell as? MyCollectionViewCell {
-            cell.noteLabel.text = editData.noteLabelArray[indexPath.row]
+            cell.noteLabel.text = EditData.noteLabelArray[indexPath.row]
         }
         return cell
     }
 }
 
 // collectionView flowLayout
-extension EditNoteViewController: UICollectionViewDelegateFlowLayout,
-                                    TagFlowLayoutDelegate {
+extension EditNoteViewController: UICollectionViewDelegateFlowLayout {
     // compute size of cell, depending on font content width and given hight
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: labelWidth((editData.noteLabelArray[indexPath.item]), 15),
+        return CGSize(width: labelWidth((EditData.noteLabelArray[indexPath.item]), 15),
                       height: 15)
     }
 
@@ -56,32 +51,17 @@ extension EditNoteViewController: UICollectionViewDelegateFlowLayout,
                         minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 8
     }
+}
 
+// set coustom flowlayout of hight and row
+extension EditNoteViewController: TagFlowLayoutDelegate {
     // max hight of collectionview
     func getCollectionViewHeightAndRows(height: CGFloat, row: Int) {
-        // upadate hight when row >= 2, cuase default lines are 2
-        if row >= 2 {
+        if row >= 1 {
             editView.collectionView.snp.updateConstraints { make in
                 make.height.equalTo(height + 10)
             }
         }
-    }
-
-    // compute width depending on font content and screen width
-    func labelWidth(_ text: String, _ height: CGFloat) -> CGFloat {
-        let size = CGSize(width: 2000, height: height)
-        let font = UIFont.systemFont(ofSize: 11)
-        let attributes = [NSAttributedString.Key.font: font]
-        let labelSize = NSString(string: text).boundingRect(with: size,
-                                options: .usesLineFragmentOrigin,
-                                attributes: attributes, context: nil)
-
-        // let max label size equal to screen width
-        if labelSize.width + 8 > editView.collectionView.frame.width {
-            return editView.collectionView.frame.width
-        }
-
-        return labelSize.width + 8
     }
 }
 
@@ -90,14 +70,14 @@ extension EditNoteViewController: UITextViewDelegate {
     func textViewDidChange(_ textView: UITextView) {
         if textView == editView.textLabelView {
             editView.textLabelView.text = textView.text
-            editData.noteLabelArray = editView.textLabelView.text.array
+            EditData.noteLabelArray = editView.textLabelView.text.array
             editView.collectionView.reloadData()
         }
         if textView == editView.textContenView {
             editView.textContenView.text = textView.text
         }
         // active save button
-        if editView.textContenView.placeholder.isHidden && editView.textLabelView.placeholder.isHidden {
+        if editView.textContenView.placeholder.isHidden {
             editView.saveButton.isEnabled = true
             editView.saveButton.tintColor = UIColor.greenColor
         } else {
@@ -159,7 +139,7 @@ private extension EditNoteViewController {
 // target
 private extension EditNoteViewController {
     @objc func saveNote() {
-        if editData.nid.isEmpty { // save
+        if EditData.nid.isEmpty { // save
             let userInfo = prepareNote(title: editView.textLabelView.text,
                                        content: editView.textContenView.text,
                                        status: editView.statusSegment.selectedSegmentIndex)
@@ -174,7 +154,7 @@ private extension EditNoteViewController {
             let userInfo = prepareNote(title: editView.textLabelView.text,
                                        content: editView.textContenView.text,
                                        status: editView.statusSegment.selectedSegmentIndex,
-                                       nid: editData.nid)
+                                       nid: EditData.nid)
             updateNote(userInfo: userInfo) {
                 self.editView.saveButton.isEnabled = false
                 let bubble = MyAlertController.setBubble(title: "", message: "更新成功", action: false)
@@ -204,5 +184,22 @@ private extension EditNoteViewController {
                                    localUpdatedAt: localUpdatedAt)
         let userInfo = UserInfo(authorization: jwt, nid: nid, note: myNote)
         return userInfo
+    }
+
+    // compute width depending on font content and screen width
+    func labelWidth(_ text: String, _ height: CGFloat) -> CGFloat {
+        let size = CGSize(width: 2000, height: height)
+        let font = UIFont.systemFont(ofSize: 11)
+        let attributes = [NSAttributedString.Key.font: font]
+        let labelSize = NSString(string: text).boundingRect(with: size,
+                                options: .usesLineFragmentOrigin,
+                                attributes: attributes, context: nil)
+
+        // let max label size equal to screen width
+        if labelSize.width + 8 > editView.collectionView.frame.width {
+            return editView.collectionView.frame.width
+        }
+
+        return labelSize.width + 8
     }
 }

@@ -8,6 +8,7 @@
 import Foundation
 
 struct EditData {
-    var noteLabelArray = [String]()
-    var nid: String = ""
+    static var noteLabelArray = [String]()
+    static var nid: String = ""
+    static var segmentIndex: Int = 0
 }

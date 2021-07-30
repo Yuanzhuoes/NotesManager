@@ -7,8 +7,8 @@
 
 import UIKit
 // nested TableViewCell with collectionview
-class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionViewDataSource,
-                       UICollectionViewDelegateFlowLayout, DisplayTagFlowLayoutDelegate {
+class MyTableViewCell: UITableViewCell {
+
     let privateLabel = UILabel()
     let contentLabel = UILabel()
     let tagLayOut = DisplayTagFlowLayout()
@@ -71,18 +71,12 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
             $0.bottom.equalToSuperview().offset(-12)
         }
     }
+}
 
-    // delegate: update the hight of collectionView
-    func getCollectionViewHeight(height: CGFloat) {
-        collectionView.snp.updateConstraints {
-            $0.height.equalTo(height + 8).priority(.low)
-        }
-    }
-
+// set cell
+extension MyTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        if noteLabelArray.count == 1 && noteLabelArray[0] == "" {
-            return 0
-        }
+        setEmptyLabel(labelArray: &noteLabelArray)
         return noteLabelArray.count
     }
 
@@ -94,7 +88,10 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
         }
         return cell
     }
+}
 
+// set system flowlayout
+extension MyTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: labelWidth(noteLabelArray[indexPath.item], 15, indexPath),
@@ -105,7 +102,19 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
                         minimumLineSpacingForSectionAt section: Int) -> CGFloat {
         return 8
     }
+}
 
+// set coustom flowlayout of hight
+extension MyTableViewCell: DisplayTagFlowLayoutDelegate {
+    // delegate: update the hight of collectionView
+    func getCollectionViewHeight(height: CGFloat) {
+        collectionView.snp.updateConstraints {
+            $0.height.equalTo(height + 8).priority(.low)
+        }
+    }
+}
+
+private extension MyTableViewCell {
     func labelWidth(_ text: String, _ height: CGFloat, _ indexPath: IndexPath) -> CGFloat {
         let size = CGSize(width: 2000, height: height)
         let font = UIFont.systemFont(ofSize: 11)
@@ -123,5 +132,14 @@ class MyTableViewCell: UITableViewCell, UICollectionViewDelegate, UICollectionVi
         }
 
         return labelSize.width + 8
+    }
+
+    func setEmptyLabel(labelArray: inout [String]) {
+        if labelArray.count == 1 && labelArray[0] == "" {
+            labelArray[0] = "无标签"
+        }
+        if labelArray.isEmpty {
+            labelArray.append("无标签")
+        }
     }
 }

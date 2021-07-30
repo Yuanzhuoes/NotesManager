@@ -46,13 +46,13 @@ private extension LoginViewController {
     }
 
     func setTarget() {
-        loginView.textName.addTarget(self, action: #selector(LoginViewController.changeButtonColor), for: .editingChanged)
-        loginView.textPassWord.addTarget(self, action: #selector(LoginViewController.changeButtonColor), for: .editingChanged)
-        loginView.textName.addTarget(self, action: #selector(LoginViewController.formatDetection), for: .editingDidEnd)
-        loginView.textName.addTarget(self, action: #selector(LoginViewController.resetErrorLabel), for: .editingChanged)
-        loginView.textPassWord.addTarget(self, action: #selector(LoginViewController.resetErrorLabel), for: .editingChanged)
-        loginView.loginButton.addTarget(self, action: #selector(LoginViewController.login), for: .touchUpInside)
-        loginView.eyeButton.addTarget(self, action: #selector(LoginViewController.changeEyeButton), for: .touchUpInside)
+        loginView.textName.addTarget(self, action: #selector(changeButtonColor), for: .editingChanged)
+        loginView.textPassWord.addTarget(self, action: #selector(changeButtonColor), for: .editingChanged)
+        loginView.textName.addTarget(self, action: #selector(formatDetection), for: .editingDidEnd)
+        loginView.textName.addTarget(self, action: #selector(resetErrorLabel), for: .editingChanged)
+        loginView.textPassWord.addTarget(self, action: #selector(resetErrorLabel), for: .editingChanged)
+        loginView.loginButton.addTarget(self, action: #selector(login), for: .touchUpInside)
+        loginView.eyeButton.addTarget(self, action: #selector(changeEyeButton), for: .touchUpInside)
     }
 }
 

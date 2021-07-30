@@ -20,12 +20,20 @@ extension String {
         return attrStr
     }
 
-    // string to array
+    // divide string to array: "a/" -> ["a", ""] -> ["a"], "/" -> ["", ""] -> []
     var array: [String] {
+        if self == "/" {
+            return []
+        }
         let dividedFlag: CharacterSet = NSCharacterSet(charactersIn: "/") as CharacterSet
-        return self.components(separatedBy: dividedFlag)
+        var result = self.components(separatedBy: dividedFlag)
+        if result.last == "" {
+            result.removeLast()
+        }
+        return result
     }
 
+    // email format validate
     var isValidateEmail: Bool {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
         let emailTest: NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)

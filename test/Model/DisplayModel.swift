@@ -8,5 +8,7 @@
 import Foundation
 
 struct SearchResults {
-    var noteArray = [SQLNote]()
+    static var noteArray = [SQLNote]()
+    static var sortedNoteArray = [SQLNote]()
+    static var hiddenMode = true
 }
