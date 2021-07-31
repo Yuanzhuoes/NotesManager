@@ -110,7 +110,7 @@ class DisplayView: UIView {
             $0.top.equalTo(editImageView.snp.bottom).offset(12)
         }
         tableView.snp.makeConstraints {
-            $0.leading.width.height.equalToSuperview()
+            $0.leading.height.width.equalToSuperview()
             $0.top.equalToSuperview()
         }
         searchResultsLabel.snp.makeConstraints {

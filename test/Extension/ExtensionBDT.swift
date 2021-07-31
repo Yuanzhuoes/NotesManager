@@ -22,14 +22,11 @@ extension String {
 
     // divide string to array: "a/" -> ["a", ""] -> ["a"], "/" -> ["", ""] -> []
     var array: [String] {
-        if self == "/" {
-            return []
-        }
         let dividedFlag: CharacterSet = NSCharacterSet(charactersIn: "/") as CharacterSet
         var result = self.components(separatedBy: dividedFlag)
-        if result.last == "" {
-            result.removeLast()
-        }
+        result = result.filter({ label in
+            return label != ""
+        })
         return result
     }
 

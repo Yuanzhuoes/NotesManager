@@ -26,6 +26,7 @@ class DisplayViewController: UIViewController {
             self?.displayView.tableView.reloadData()
             DispatchQueue.main.async {
                 self?.displayView.tableView.reloadData()
+                self?.displayView.tableView.reloadData()
             }
         }
     }
@@ -40,6 +41,7 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
             displayView.searchResultsLabel.isHidden = SearchResults.hiddenMode
             return SearchResults.noteArray.count
         } else {
+            displayView.searchResultsLabel.isHidden = SearchResults.hiddenMode
             guard let count = notes?.count else {
                 return 0
             }
@@ -61,6 +63,7 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
         else {
             return MyTableViewCell(style: .default, reuseIdentifier: "cell")
         }
+
         cell.selectionStyle = .none
 
         cell.layoutIfNeeded()
@@ -219,7 +222,7 @@ private extension DisplayViewController {
 
     func setConstrains() {
         displayView.snp.makeConstraints {
-            $0.bottom.top.width.height.equalToSuperview()
+            $0.bottom.top.leading.width.height.equalToSuperview()
         }
     }
 
