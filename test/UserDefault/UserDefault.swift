@@ -13,6 +13,7 @@ struct UserDefaultKeys {
         case userName, userPassword, jwt
     }
 }
+
 let userAccount = UserDefaults.standard
 
 // TODO: extension NSDte

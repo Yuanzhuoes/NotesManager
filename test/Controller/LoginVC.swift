@@ -83,12 +83,16 @@ private extension LoginViewController {
         let userInfo = UserInfo(email: loginView.textName.text!, pwd: loginView.textPassWord.text)
         loginRequest(userInfo: userInfo) { response in
             if response.message == "背单词服务出错：账号或密码错误。" {
-                self.setErrorLabel()
+                DispatchQueue.main.async {
+                    self.setErrorLabel()
+                }
             } else {
-                self.saveLoginInfo(jwt: response.jwt,
-                                   name: self.loginView.textName.text,
-                                   passWord: self.loginView.textPassWord.text)
-                self.presentDisplayPage()
+                DispatchQueue.main.async {
+                    self.saveLoginInfo(jwt: response.jwt,
+                                       name: self.loginView.textName.text,
+                                       passWord: self.loginView.textPassWord.text)
+                    self.presentDisplayPage()
+                }
             }
         }
     }

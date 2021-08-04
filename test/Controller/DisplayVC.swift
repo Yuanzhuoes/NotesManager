@@ -24,8 +24,8 @@ class DisplayViewController: UIViewController {
         super.viewWillAppear(animated)
         loadData { [weak self] in
             self?.displayView.tableView.reloadData()
+            // 主线程更新UI，异步
             DispatchQueue.main.async {
-                self?.displayView.tableView.reloadData()
                 self?.displayView.tableView.reloadData()
             }
         }
@@ -70,7 +70,15 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
         cell.collectionView.reloadData()
 
         if displayView.searchController.isActive {
-            cell.noteLabelArray = SearchResults.noteArray[indexPath.row].tag.array
+            if let keyword = displayView.searchController.searchBar.searchTextField.text {
+                SearchResults.sortedLabelArray = SearchResults.sort(keyword: keyword,
+                                                                    text: SearchResults
+                                                                        .noteArray[indexPath.row].tag.array)
+                print(keyword)
+            }
+            print(SearchResults.noteArray[indexPath.row].tag.array)
+            print(SearchResults.sortedLabelArray)
+            cell.noteLabelArray = SearchResults.sortedLabelArray
             cell.privateLabel.text = SearchResults.noteArray[indexPath.row].status.intToString
             cell.contentLabel.attributedText = SearchResults.noteArray[indexPath.row].content
                 .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
@@ -183,7 +191,6 @@ extension DisplayViewController: UISearchResultsUpdating {
                             return
                         }
                         SearchResults.noteArray.append(SQLNote(id: id, tag: tag, content: content, status: status))
-                        // 将搜索关键字放在最前面
                     }
                 }
                 loadData { [weak self] in
@@ -294,7 +301,9 @@ private extension DisplayViewController {
         let userInfo = UserInfo(authorization: jwt)
         logoutRequest(userInfo: userInfo) { _ in
             self.deleteUserDefaulte()
-            self.presentLoginPage()
+            DispatchQueue.main.async {
+                self.presentLoginPage()
+            }
         }
     }
 

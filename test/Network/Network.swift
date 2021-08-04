@@ -193,6 +193,7 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
         encoding = URLEncoding.default
     }
 
+    let queue = DispatchQueue.global(qos: .utility)
     let urlString = url?.absoluteString
     var request: DataRequest?
     request =
@@ -200,12 +201,14 @@ func requestAndResponse(userInfo: UserInfo? = nil, function: Function,
                    method: method,
                    parameters: parameters,
                    encoding: encoding,
-                   headers: headers).responseJSON { response in
+                   headers: headers).responseJSON(queue: queue) { response in
+                    // 后台异步
                     DispatchQueue.global().async {
                         if let curl = request?.cURLDescription() {
                             print("API: \(curl)")
                         }
                     }
+                    // 主线程
                     switch response.result {
                     case .success(let json):
                         guard let data = response.data else { return }

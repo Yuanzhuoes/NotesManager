@@ -36,7 +36,9 @@ extension UIViewController {
                 self.presentBubbleAndDismiss(bubble)
 
                 // excute clousure
-                completion?()
+                DispatchQueue.main.async {
+                    completion?()
+                }
             }
         }
     }
@@ -61,8 +63,9 @@ extension UIViewController {
             } catch {
                 print(DBManager.db?.errorMessage as Any)
             }
-
-            completion?()
+            DispatchQueue.main.async {
+                completion?()
+            }
         }
     }
 
@@ -73,7 +76,9 @@ extension UIViewController {
         requestAndResponse(userInfo: userInfo, function: .delete, method: .delete) { _ in
             try? DBManager.db?.deleteNote(nid: id)
             notes?.remove(at: row)
-            completion?()
+            DispatchQueue.main.async {
+                completion?()
+            }
         }
     }
 
@@ -104,6 +109,7 @@ extension UIViewController {
     func loginRequest(userInfo: UserInfo, completion: @escaping ((ServerDescription) -> Void)) {
         requestAndResponse(userInfo: userInfo,
                            function: .login, method: .post) { serverDescription in
+            // background queue
             completion(serverDescription)
         }
     }
@@ -123,7 +129,9 @@ extension UIViewController {
     }
 
     func presentBubbleAndDismiss(_ bubble: MyAlertController) {
-        self.present(bubble, animated: true, completion: nil)
+        DispatchQueue.main.async {
+            self.present(bubble, animated: true, completion: nil)
+        }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.0, execute: {
             bubble.dismiss(animated: true, completion: nil)
         })

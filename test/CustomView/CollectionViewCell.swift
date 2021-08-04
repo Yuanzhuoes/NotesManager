@@ -14,16 +14,21 @@ class MyCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         // notelable, single line default
-        noteLabel.font = UIFont.systemFont(ofSize: 11)
-        noteLabel.textAlignment = .center
-        noteLabel.textColor = UIColor.textColor
-        noteLabel.backgroundColor = UIColor.navigationColor
-        self.contentView.addSubview(view)
-        self.view.addSubview(noteLabel)
+        setCell()
     }
 
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+
+    func setCell() {
+        noteLabel.font = UIFont.systemFont(ofSize: 11)
+        noteLabel.textAlignment = .center
+        noteLabel.textColor = UIColor.textColor
+        noteLabel.backgroundColor = UIColor.navigationColor
+        noteLabel.layer.cornerRadius = 3
+        self.contentView.addSubview(view)
+        self.view.addSubview(noteLabel)
     }
 
     override func layoutSubviews() {
