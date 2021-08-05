@@ -15,12 +15,3 @@ struct UserDefaultKeys {
 }
 
 let userAccount = UserDefaults.standard
-
-// TODO: extension NSDte
-func getDateIS08601() -> String {
-    let now = NSDate()
-    let formatter = DateFormatter()
-    formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss'Z'"
-    formatter.timeZone = NSTimeZone(forSecondsFromGMT: 0) as TimeZone
-    return formatter.string(from: now as Date)
-}

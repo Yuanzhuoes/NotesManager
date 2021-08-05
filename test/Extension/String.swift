@@ -10,13 +10,19 @@ import UIKit
 
 extension String {
     // arrtibuted string setting: eg. line spacing, breakMode, color, font size
-    func attributedString(lineSpaceing: CGFloat, lineBreakModel: NSLineBreakMode) -> NSAttributedString {
+    func attributedString(lineSpaceing: CGFloat, lineBreakModel: NSLineBreakMode, keyword: String = "") -> NSAttributedString {
         let style = NSMutableParagraphStyle()
         style.lineSpacing = lineSpaceing
         style.lineBreakMode = lineBreakModel
+
+        let str = NSString(string: self)
+        let theRange = str.range(of: keyword)
+
         let attributes = [NSAttributedString.Key.paragraphStyle: style]
             as [NSAttributedString.Key: Any]
         let attrStr = NSMutableAttributedString.init(string: self, attributes: attributes)
+        attrStr.addAttributes([NSAttributedString.Key.foregroundColor : UIColor.greenColor], range: theRange)
+
         return attrStr
     }
 
@@ -35,12 +41,6 @@ extension String {
         let emailRegex = "[A-Z0-9a-z._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,4}"
         let emailTest: NSPredicate = NSPredicate(format: "SELF MATCHES %@", emailRegex)
         return emailTest.evaluate(with: self)
-    }
-}
-
-extension Int {
-    var intToString: String {
-        return self == 1 ? "公" : "私"
     }
 }
 

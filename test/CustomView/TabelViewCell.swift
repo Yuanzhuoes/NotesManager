@@ -19,7 +19,6 @@ class MyTableViewCell: UITableViewCell {
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         setUI()
-        setConstraints()
     }
 
     required init?(coder: NSCoder) {
@@ -27,26 +26,45 @@ class MyTableViewCell: UITableViewCell {
     }
 
     func setUI() {
+        setCollectionView()
+        setPrivateLabel()
+        setContentLabel()
+        setSubview()
+        setDelegate()
+        setConstraints()
+    }
+
+    func setCollectionView() {
         collectionView.backgroundColor = UIColor.white
-        collectionView.register(MyCollectionViewCell.self, forCellWithReuseIdentifier: MyCollectionViewCell.description())
         collectionView.isScrollEnabled = false
         collectionView.showsHorizontalScrollIndicator = false
         collectionView.allowsSelection = true
+        collectionView.register(MyCollectionViewCell.self, forCellWithReuseIdentifier: MyCollectionViewCell.description())
+    }
 
+    func setPrivateLabel() {
         privateLabel.font = UIFont.systemFont(ofSize: 11)
         privateLabel.textAlignment = .center
         privateLabel.textColor = UIColor.white
-        privateLabel.backgroundColor = UIColor.greenColor
+        privateLabel.layer.cornerRadius = 1
+        privateLabel.layer.backgroundColor = UIColor.greenColor.cgColor
+    }
 
+    func setContentLabel() {
         contentLabel.backgroundColor = UIColor.white
         contentLabel.font = UIFont.systemFont(ofSize: 14)
         contentLabel.textAlignment = .left
         contentLabel.textColor = UIColor.textColor
-        // setting zero will grow with the label contents
         contentLabel.numberOfLines = 2
+    }
+
+    func setSubview() {
         self.contentView.addSubview(self.collectionView)
         self.contentView.addSubview(self.privateLabel)
         self.contentView.addSubview(self.contentLabel)
+    }
+
+    func setDelegate() {
         collectionView.delegate = self
         collectionView.dataSource = self
         tagLayOut.delegate = self
@@ -85,6 +103,10 @@ extension MyTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource 
             .dequeueReusableCell(withReuseIdentifier: MyCollectionViewCell.description(), for: indexPath)
         if let cell = cell as? MyCollectionViewCell {
             cell.noteLabel.text = noteLabelArray[indexPath.row]
+            cell.noteLabel.textColor = UIColor.textColor
+            if SearchResults.isSubsequence(keyword: SearchResults.keyword, target: noteLabelArray[indexPath.row]) {
+                cell.noteLabel.textColor = UIColor.greenColor
+            }
         }
         return cell
     }
@@ -94,8 +116,8 @@ extension MyTableViewCell: UICollectionViewDelegate, UICollectionViewDataSource 
 extension MyTableViewCell: UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
                         sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: labelWidth(noteLabelArray[indexPath.item], 15, indexPath),
-                      height: 15)
+        return CGSize(width: labelWidth(noteLabelArray[indexPath.item], 18, indexPath),
+                      height: 18)
     }
 
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout,
@@ -125,9 +147,9 @@ private extension MyTableViewCell {
                                 attributes: attributes,
                                 context: nil)
 
-        if indexPath.row == 0 && labelSize.width + 8 > collectionView.frame.width - 18 {
-            return collectionView.frame.width - 20
-        } else if indexPath.row > 0 && labelSize.width + 8 > collectionView.frame.width {
+        if indexPath.row == 0 && labelSize.width >= collectionView.frame.width - 28 {
+            return collectionView.frame.width - 28
+        } else if indexPath.row > 0 && labelSize.width >= collectionView.frame.width {
             return collectionView.frame.width
         }
 

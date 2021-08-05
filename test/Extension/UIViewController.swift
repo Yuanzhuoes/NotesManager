@@ -31,12 +31,10 @@ extension UIViewController {
                 } catch {
                     print(DBManager.db?.errorMessage as Any)
                 }
-
-                let bubble = MyAlertController.setBubble(title: "", message: "保存成功", action: false)
-                self.presentBubbleAndDismiss(bubble)
-
                 // excute clousure
                 DispatchQueue.main.async {
+                    let bubble = MyAlertController.setBubble(title: "", message: "保存成功", action: false)
+                    self.presentBubbleAndDismiss(bubble)
                     completion?()
                 }
             }

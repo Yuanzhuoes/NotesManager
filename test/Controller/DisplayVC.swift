@@ -24,7 +24,6 @@ class DisplayViewController: UIViewController {
         super.viewWillAppear(animated)
         loadData { [weak self] in
             self?.displayView.tableView.reloadData()
-            // 主线程更新UI，异步
             DispatchQueue.main.async {
                 self?.displayView.tableView.reloadData()
             }
@@ -54,6 +53,10 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
         }
     }
 
+//    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+//        return 10
+//    }
+
     // init tabelview cell
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         // init a not reusable new cell to avoid hight update error?
@@ -65,7 +68,6 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
         }
 
         cell.selectionStyle = .none
-
         cell.layoutIfNeeded()
         cell.collectionView.reloadData()
 
@@ -73,16 +75,23 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
             if let keyword = displayView.searchController.searchBar.searchTextField.text {
                 SearchResults.sortedLabelArray = SearchResults.sort(keyword: keyword,
                                                                     text: SearchResults
-                                                                        .noteArray[indexPath.row].tag.array)
-                print(keyword)
+                                                                        .noteArray[indexPath.row]
+                                                                        .tag.array)
+                SearchResults.clippedNoteContent = SearchResults.clipNoteContent(keyword: keyword,
+                                                                                 text: SearchResults
+                                                                                    .noteArray[indexPath.row]
+                                                                                    .content)
+                SearchResults.keyword = keyword
             }
-            print(SearchResults.noteArray[indexPath.row].tag.array)
-            print(SearchResults.sortedLabelArray)
+
             cell.noteLabelArray = SearchResults.sortedLabelArray
-            cell.privateLabel.text = SearchResults.noteArray[indexPath.row].status.intToString
-            cell.contentLabel.attributedText = SearchResults.noteArray[indexPath.row].content
-                .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
+            cell.privateLabel.text = "公"
+            cell.contentLabel.attributedText = SearchResults.clippedNoteContent
+                                                            .attributedString(lineSpaceing: 8,
+                                                                              lineBreakModel: .byTruncatingTail,
+                                                                              keyword: SearchResults.keyword)
         } else {
+            SearchResults.keyword.removeAll()
             if let notesLabelArray = notes?[indexPath.row].tag.array {
                 cell.noteLabelArray = notesLabelArray
             } else {
@@ -92,7 +101,6 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
             cell.contentLabel.attributedText = notes?[indexPath.row].content
                 .attributedString(lineSpaceing: 8, lineBreakModel: .byTruncatingTail)
         }
-
         return cell
     }
 
@@ -143,7 +151,6 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
                 let viewController = SearchViewController()
                 configureOthersSearchNotePage(viewController: viewController, note: searchNote)
                 self.navigationController?.pushViewController(viewController, animated: false)
-                displayView.searchController.isActive = false
                 return
             }
         // update
@@ -153,9 +160,7 @@ extension DisplayViewController: UITableViewDataSource, UITableViewDelegate {
             }
             configureMyNotePage(viewController: viewController, note: myNote)
         }
-
         self.navigationController?.pushViewController(viewController, animated: false)
-        displayView.searchController.isActive = false
     }
 }
 
@@ -166,15 +171,20 @@ extension DisplayViewController: UISearchResultsUpdating {
 
         let jwt = userAccount.string(forKey: UserDefaultKeys.AccountInfo.jwt.rawValue)
         let userInfo = UserInfo(authorization: jwt)
+        var text: String?
+        DispatchQueue.main.async {
+            text = searchController.searchBar.searchTextField.text
+        }
         let requestWorkItem = DispatchWorkItem { [self] in
             requestAndResponse(userInfo: userInfo,
                                function: .search,
                                method: .get,
                                searchText: searchController.searchBar.text) { [self] serverDescription in
+
                 // 如果没有搜索结果 显示标签 否则 隐藏
                 SearchResults.hiddenMode = serverDescription.pagination?.total == 0 ? false : true
                 // 如果没有搜索结果 或者 没有输入，清空缓存，reload data
-                if serverDescription.pagination?.total == 0 || searchController.searchBar.searchTextField.text == "" {
+                if serverDescription.pagination?.total == 0 || text == "" {
                     SearchResults.noteArray.removeAll()
                 } else {
                     SearchResults.noteArray.removeAll()
@@ -260,6 +270,7 @@ private extension DisplayViewController {
 
     func presentEditPage() {
         EditData.noteLabelArray = []
+        EditData.nid = ""
         let viewController = EditNoteViewController()
         viewController.onSave = { [weak self] in
             self?.displayView.tableView.reloadData()
@@ -272,11 +283,11 @@ private extension DisplayViewController {
     }
 
     func configureMyNotePage(viewController: EditNoteViewController, note: SQLNote) {
-        viewController.editView.textLabelView.text = note.tag
-        viewController.editView.textContenView.text = note.content
         EditData.noteLabelArray = note.tag.array
         EditData.nid = note.id
         EditData.segmentIndex = note.status
+        viewController.editView.textLabelView.text = note.tag
+        viewController.editView.textContenView.text = note.content
         viewController.title = "我的搜记"
     }
 

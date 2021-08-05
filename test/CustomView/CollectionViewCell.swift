@@ -25,8 +25,9 @@ class MyCollectionViewCell: UICollectionViewCell {
         noteLabel.font = UIFont.systemFont(ofSize: 11)
         noteLabel.textAlignment = .center
         noteLabel.textColor = UIColor.textColor
-        noteLabel.backgroundColor = UIColor.navigationColor
+        // details, whats off-screen rendering
         noteLabel.layer.cornerRadius = 3
+        noteLabel.layer.backgroundColor = UIColor.segmentColor.cgColor
         self.contentView.addSubview(view)
         self.view.addSubview(noteLabel)
     }

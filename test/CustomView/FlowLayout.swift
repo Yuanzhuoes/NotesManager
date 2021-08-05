@@ -92,7 +92,7 @@ class DisplayTagFlowLayout: UICollectionViewFlowLayout {
                 let origin = preAttr.frame.maxX
                 let targetX = origin + maxSpacing
                 let targetY = preAttr.frame.origin.y
-                if targetX + curAttr.frame.width <= collectionViewContentSize.width - 18 && row == 1 {
+                if targetX + curAttr.frame.width <= collectionViewContentSize.width - 28 && row == 1 {
                     curAttr.frame.origin.x = targetX
                     curAttr.frame.origin.y = targetY
                 } else if targetX + curAttr.frame.width <= collectionViewContentSize.width && row > 1 {
