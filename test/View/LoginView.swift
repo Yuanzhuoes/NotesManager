@@ -57,7 +57,6 @@ class LoginView: UIView {
         textPassWord.rightViewMode = .always
 
         textName.text = userAccount.string(forKey: UserDefaultKeys.AccountInfo.userName.rawValue)
-        textPassWord.text = userAccount.string(forKey: UserDefaultKeys.AccountInfo.userPassword.rawValue)
     }
 
     func setButton() {
@@ -65,7 +64,8 @@ class LoginView: UIView {
         loginButton.setTitleColor(UIColor.white, for: .normal)
         loginButton.layer.cornerRadius = 5
         loginButton.backgroundColor = UIColor.greenColor
-        loginButton.isEnabled = true
+        loginButton.isEnabled = false
+        loginButton.backgroundColor = UIColor.buttonDisabledColor
         eyeButton.setImage(UIImage(named: "EyeOff")?
                             .withTintColor(UIColor.eyeColor, renderingMode: .automatic), for: .normal)
         // change size of custom image

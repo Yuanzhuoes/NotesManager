@@ -48,7 +48,6 @@ private extension LoginViewController {
     func setTarget() {
         loginView.textName.addTarget(self, action: #selector(changeButtonColor), for: .editingChanged)
         loginView.textPassWord.addTarget(self, action: #selector(changeButtonColor), for: .editingChanged)
-        loginView.textName.addTarget(self, action: #selector(formatDetection), for: .editingDidEnd)
         loginView.textName.addTarget(self, action: #selector(resetErrorLabel), for: .editingChanged)
         loginView.textPassWord.addTarget(self, action: #selector(resetErrorLabel), for: .editingChanged)
         loginView.loginButton.addTarget(self, action: #selector(login), for: .touchUpInside)
@@ -120,15 +119,6 @@ private extension LoginViewController {
             loginView.eyeButton.imageEdgeInsets = UIEdgeInsets(top: 18, left: 16, bottom: 18, right: 16)
             loginView.eyeButton.isSelected = true
             loginView.textPassWord.isSecureTextEntry = false
-        }
-    }
-
-    @objc func formatDetection() {
-        if loginView.textName.text!.isValidateEmail {
-            loginView.errorLabel.isHidden = true
-        } else {
-            loginView.errorLabel.text = "邮箱格式错误"
-            loginView.errorLabel.isHidden = false
         }
     }
 
