@@ -38,7 +38,8 @@ class MyTableViewCell: UITableViewCell {
         collectionView.backgroundColor = UIColor.white
         collectionView.isScrollEnabled = false
         collectionView.showsHorizontalScrollIndicator = false
-        collectionView.allowsSelection = true
+        // default is true, set false to ignore and remove from the event queue.
+        collectionView.isUserInteractionEnabled = false
         collectionView.register(MyCollectionViewCell.self, forCellWithReuseIdentifier: MyCollectionViewCell.description())
     }
 
